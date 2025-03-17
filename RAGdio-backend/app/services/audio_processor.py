@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
-
 
 class AudioProcessor(ABC):
     """Abstract class for audio processing models."""
