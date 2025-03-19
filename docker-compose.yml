@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  fastapi:
+    build:
+      context: ./RAGdio-backend
+      dockerfile: Dockerfile
+    container_name: rag_audio_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./RAGdio-backend/.env
+    depends_on:
+      - qdrant
+    restart: always
+
+  qdrant:
+    image: qdrant/qdrant:v1.7.1
+    container_name: qdrant_db
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: always
+
+volumes:
+  qdrant_data:
