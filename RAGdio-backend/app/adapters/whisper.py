@@ -6,8 +6,16 @@ class WhisperAudioProcessor(AudioProcessor):
     """Whisper ASR implementation."""
 
     def __init__(self, model_size: str = "base"):
-        """Loads Whisper model (default: 'base')."""
-        self.model = whisper.load_model(model_size)
+        """Dynamically loads Whisper model when initialized."""
+        try:
+            import whisper  # Lazy import
+        except ModuleNotFoundError:
+            raise ImportError(
+                "Whisper is not installed. Install it using 'pip install openai-whisper'"
+            )
+
+        self.whisper = whisper
+        self.model = self.whisper.load_model(model_size)
 
     def transcribe(self, audio_file: str) -> str:
         """Transcribes audio using Whisper."""
