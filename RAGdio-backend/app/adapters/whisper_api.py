@@ -1,4 +1,5 @@
 import os
+from app.core.config import Config
 import tempfile
 from openai import OpenAI
 from pydub import AudioSegment

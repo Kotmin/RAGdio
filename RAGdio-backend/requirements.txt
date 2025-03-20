@@ -4,6 +4,7 @@ certifi==2025.1.31
 charset-normalizer==3.4.1
 click==8.1.8
 distro==1.9.0
+dotenv==0.9.9
 fastapi==0.115.11
 greenlet==3.1.1
 h11==0.14.0
@@ -27,6 +28,7 @@ pydantic_core==2.27.2
 pydub==0.25.1
 pytest==8.3.5
 pytest-mock==3.14.0
+python-dotenv==1.0.1
 PyYAML==6.0.2
 requests==2.32.3
 requests-toolbelt==1.0.0
