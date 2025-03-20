@@ -1,8 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from app.adapters.whisper import WhisperAudioProcessor
+# from app.adapters.whisper import WhisperAudioProcessor
 
+from app.adapters.whisper_api import WhisperAPIAudioProcessor
 router = APIRouter()
-whisper_processor = WhisperAudioProcessor()
+# whisper_processor = WhisperAudioProcessor()
+whisper_processor = WhisperAPIAudioProcessor()
 
 
 @router.post("/upload_audio/")
