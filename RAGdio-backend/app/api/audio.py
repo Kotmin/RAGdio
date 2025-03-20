@@ -18,5 +18,7 @@ async def upload_audio(file: UploadFile = File(...)):
         text = whisper_processor.transcribe(file_path)
         return {"filename": file.filename, "transcription": text}
 
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

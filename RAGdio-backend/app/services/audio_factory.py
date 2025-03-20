@@ -1,8 +1,14 @@
 from app.services.audio_processor import AudioProcessor
-from app.adapters.whisper import WhisperAudioProcessor
-from app.adapters.whisper_api import WhisperAPIAudioProcessor  # New API-based Whisper
-from app.adapters.local_asr import LocalASRProcessor  # Placeholder for local ASR
+from app.adapters.whisper_api import WhisperAPIAudioProcessor
+from app.adapters.local_asr import LocalASRProcessor
 from app.core.config import Config
+
+try:
+    from app.adapters.whisper import WhisperAudioProcessor
+    whisper_available = True
+except ImportError:
+    whisper_available = False
+
 
 class AudioProcessorFactory:
     """Factory to create ASR models dynamically."""
@@ -12,10 +18,13 @@ class AudioProcessorFactory:
         model_name = Config.ASR_MODEL.lower()
 
         if model_name == "whisper":
-            return WhisperAudioProcessor()  # Local Whisper Model
+            if not whisper_available:
+                raise ValueError(
+                    "Whisper is not installed. Set ASR_MODEL=whisper_api or install Whisper.")
+            return WhisperAudioProcessor()
         elif model_name == "whisper_api":
-            return WhisperAPIAudioProcessor()  # Whisper API
+            return WhisperAPIAudioProcessor()
         elif model_name == "local":
-            return LocalASRProcessor()  # Future local ASR
+            return LocalASRProcessor()
         else:
             raise ValueError(f"Unsupported ASR model: {model_name}")
