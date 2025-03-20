@@ -1,4 +1,3 @@
-import whisper
 from app.services.audio_processor import AudioProcessor
 
 
