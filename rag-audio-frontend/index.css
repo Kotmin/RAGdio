@@ -17,41 +17,50 @@ body,
 #root {
   @apply flex justify-center items-center;
 }
+/* 
+body {
+  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+} */
 
 /* Neon border animation */
 @layer components {
   .neon-border {
-    border-image: linear-gradient(120deg, #a855f7, #9333ea, #e879f9, #c084fc) 1;
-    animation: neonAnim 6s ease infinite;
+    position: relative;
+    z-index: 0;
+    border: 2px solid transparent;
+    border-radius: 1rem;
+  }
+
+  .neon-border::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+      270deg,
+      #a855f7,
+      #9333ea,
+      #e879f9,
+      #c084fc,
+      #a855f7
+    );
+    background-size: 800% 800%;
+    border-radius: inherit;
+    animation: neonGlow 8s ease infinite;
   }
 }
 
-@keyframes neonAnim {
+@keyframes neonGlow {
   0% {
-    border-image-source: linear-gradient(
-      120deg,
-      #a855f7,
-      #9333ea,
-      #e879f9,
-      #c084fc
-    );
+    background-position: 0% 50%;
   }
   50% {
-    border-image-source: linear-gradient(
-      120deg,
-      #c084fc,
-      #e879f9,
-      #9333ea,
-      #a855f7
-    );
+    background-position: 100% 50%;
   }
   100% {
-    border-image-source: linear-gradient(
-      120deg,
-      #a855f7,
-      #9333ea,
-      #e879f9,
-      #c084fc
-    );
+    background-position: 0% 50%;
   }
 }
