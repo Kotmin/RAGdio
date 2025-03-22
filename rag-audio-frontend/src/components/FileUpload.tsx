@@ -1,5 +1,9 @@
 import { useRef, useState } from "react";
-import { CloudArrowUpIcon, TrashIcon } from "@heroicons/react/24/solid";
+import {
+  CloudArrowUpIcon,
+  PaperClipIcon,
+  TrashIcon,
+} from "@heroicons/react/24/solid";
 
 interface FileItem {
   id: string;
@@ -37,28 +41,31 @@ function FileUpload() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-2">
       {/* Counter */}
-      {files.length > 0 && (
-        <p className="mb-2 text-sm text-gray-500 font-medium">
-          {files.length} file{files.length > 1 ? "s" : ""} selected
-        </p>
-      )}
+      <div className="text-sm text-gray-500 font-medium">
+        {files.length > 0
+          ? `${files.length} file(s) selected`
+          : "No files added yet"}
+      </div>
 
       {/* Upload Box */}
       <div
         onClick={() => inputRef.current?.click()}
         onDrop={onDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="group relative w-full border-4 border-dashed rounded-xl p-6 text-center cursor-pointer neon-border hover:shadow-lg"
+        className="neon-border relative border-4 border-dashed rounded-xl p-4 transition-all cursor-pointer hover:shadow-lg"
       >
-        <CloudArrowUpIcon className="w-8 h-8 mx-auto text-purple-600 group-hover:scale-110 transition-transform" />
-        <p className="text-gray-700 font-medium mt-2">
-          Drag & drop or click to choose
-        </p>
-        <p className="text-sm text-gray-400">
-          Supported: mp3, wav, m4a. Max 25MB
-        </p>
+        {/* Upload Icon + Label */}
+        {files.length === 0 && (
+          <div className="flex flex-col items-center text-center text-gray-500 py-4">
+            <CloudArrowUpIcon className="w-8 h-8 text-purple-600 mb-2" />
+            <p className="font-medium">Drag & drop or click to choose</p>
+            <p className="text-sm text-gray-400">
+              mp3, wav, m4a • max 25MB each
+            </p>
+          </div>
+        )}
 
         <input
           ref={inputRef}
@@ -68,44 +75,51 @@ function FileUpload() {
           className="hidden"
           onChange={(e) => handleFiles(e.target.files)}
         />
-      </div>
 
-      {/* Files List */}
-      {files.length > 0 && (
-        <div className="mt-4 overflow-x-auto pb-2">
-          <div className="flex space-x-4">
-            {files.map(({ id, file }) => (
-              <div
-                key={id}
-                className="relative min-w-[160px] max-w-[160px] rounded-lg border-2 border-purple-400 bg-white p-3 flex-shrink-0 shadow-md"
-              >
-                {/* Delete Button */}
-                <button
-                  onClick={() => removeFile(id)}
-                  className="absolute top-1 right-1 p-1 rounded-full bg-white hover:bg-red-100 border border-red-300"
+        {/* Files inside the box */}
+        {files.length > 0 && (
+          <div className="mt-2 overflow-x-auto">
+            <div className="flex space-x-3 pb-2">
+              {files.map(({ id, file }) => (
+                <div
+                  key={id}
+                  className="relative min-w-[110px] max-w-[110px] h-[140px] border-2 border-purple-400 rounded-lg p-2 bg-white shadow-md flex flex-col items-center justify-start"
                 >
-                  <TrashIcon className="w-4 h-4 text-red-500" />
-                </button>
+                  {/* Trash - ABSOLUTE TOP LEFT */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFile(id);
+                    }}
+                    className="absolute top-1 left-1 bg-red-100 border border-red-300 rounded-full p-[2px] hover:bg-red-200"
+                    title="Remove file"
+                  >
+                    <TrashIcon className="w-4 h-4 text-red-600" />
+                  </button>
 
-                {/* File Info */}
-                <p className="text-sm font-semibold truncate">{file.name}</p>
-                <p className="text-xs text-gray-500">
-                  {formatBytes(file.size)} •{" "}
-                  {file.type.split("/")[1] || "unknown"}
-                </p>
+                  {/* Paper Clip Icon */}
+                  <PaperClipIcon className="w-6 h-6 text-purple-400 mb-1 mt-4" />
 
-                {/* Placeholder for Progress */}
-                <div className="mt-2 w-full bg-gray-200 h-1 rounded">
-                  <div
-                    className="bg-purple-500 h-1 rounded animate-pulse"
-                    style={{ width: "60%" }} // simulate upload progress
-                  ></div>
+                  {/* Filename */}
+                  <p className="text-xs font-semibold text-center px-1 leading-tight line-clamp-2 break-all">
+                    {file.name}
+                  </p>
+
+                  {/* File type */}
+                  <p className="text-[10px] text-gray-400 text-center mt-1">
+                    {file.type.split("/")[1] || "unknown"}
+                  </p>
+
+                  {/* File size */}
+                  <p className="text-[10px] text-gray-500 text-center">
+                    {formatBytes(file.size)}
+                  </p>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
