@@ -1,3 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  @apply bg-gradient-to-br from-gray-50 to-gray-100;
+}
+
+#root {
+  @apply flex justify-center items-center;
+}
+
+@layer components {
+  .neon-border {
+    border-image: linear-gradient(120deg, #a855f7, #9333ea, #e879f9, #c084fc) 1;
+    animation: neonAnim 5s ease infinite;
+  }
+}
+
+@keyframes neonAnim {
+  0% {
+    border-image-source: linear-gradient(
+      120deg,
+      #a855f7,
+      #9333ea,
+      #e879f9,
+      #c084fc
+    );
+  }
+  50% {
+    border-image-source: linear-gradient(
+      120deg,
+      #c084fc,
+      #e879f9,
+      #9333ea,
+      #a855f7
+    );
+  }
+  100% {
+    border-image-source: linear-gradient(
+      120deg,
+      #a855f7,
+      #9333ea,
+      #e879f9,
+      #c084fc
+    );
+  }
+}
