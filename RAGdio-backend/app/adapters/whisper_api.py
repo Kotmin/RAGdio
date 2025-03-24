@@ -63,7 +63,8 @@ class WhisperAPIAudioProcessor(AudioProcessor):
                         response_format="srt",
                         temperature=0.3
                     )
-                    full_transcription.append(transcription.text)
+                    # full_transcription.append(transcription.text)
+                    full_transcription.append(transcription)
                 except Exception as e:
                     print(f"Error processing chunk {chunk}: {e}")
 

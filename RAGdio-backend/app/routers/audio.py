@@ -6,7 +6,7 @@ from typing import List
 from app.adapters.whisper_api import WhisperAPIAudioProcessor
 router = APIRouter()
 # whisper_processor = WhisperAudioProcessor()
-whisper_processor = WhisperAPIAudioProcessor()
+transcribe_processor = WhisperAPIAudioProcessor()
 
 
 
@@ -47,8 +47,8 @@ async def upload_audio(files: List[UploadFile] = File(...)):
             buffer.write(await file.read())
 
         try:
-            # transcription = whisper_processor.transcribe(file_path)
-            transcription = "yes yes" *32
+            transcription = transcribe_processor.transcribe(file_path)
+            # transcription = "yes yes" *32
             results.append({
                 "filename": file.filename,
                 "transcription": transcription
@@ -59,8 +59,8 @@ async def upload_audio(files: List[UploadFile] = File(...)):
                 "error": str(e)
             })
         finally:
-            print("ok")
-            # Path(file_path).unlink(missing_ok=True)
+            # print("ok")
+            Path(file_path).unlink(missing_ok=True)
 
     return {"results": results}
             # Return structured response
