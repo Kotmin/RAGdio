@@ -1,18 +1,24 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import AudioUploadSection from "./AudioUploadSection";
 import { useAudioUpload } from "../hooks/useAudioUpload";
 import { toast } from "react-toastify";
 import UploadResultModal from "./UploadResultModal";
 
+interface TranscriptionResult {
+  filename: string;
+  transcription: string;
+}
+
 export default function UploadPageForm() {
   const [files, setFiles] = useState<File[]>([]);
+  const [pendingResults, setPendingResults] = useState<TranscriptionResult[]>(
+    []
+  );
+  const [currentResult, setCurrentResult] =
+    useState<TranscriptionResult | null>(null);
+
   const languageRef = useRef<HTMLSelectElement | null>(null);
   const ragRef = useRef<HTMLSelectElement | null>(null);
-  const [pendingResult, setPendingResult] = useState<{
-    filename: string;
-    transcription: string;
-  } | null>(null);
-
   const { uploadFiles, loading } = useAudioUpload();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,22 +34,30 @@ export default function UploadPageForm() {
       files,
       language,
       rag,
-      undefined, // onProgress — not used yet
+      undefined,
       (filename, transcription) => {
-        setPendingResult({ filename, transcription });
+        setPendingResults((prev) => [...prev, { filename, transcription }]);
       }
     );
   };
 
+  // Show next modal when one is dismissed
+  useEffect(() => {
+    if (!currentResult && pendingResults.length > 0) {
+      const [next, ...rest] = pendingResults;
+      setCurrentResult(next);
+      setPendingResults(rest);
+    }
+  }, [currentResult, pendingResults]);
+
   const handleSendToRAG = () => {
-    // Future: Call backend RAG-save endpoint here
-    toast.success("Saved to RAG!");
-    setPendingResult(null);
+    toast.success(`Saved ${currentResult?.filename} to RAG`);
+    setCurrentResult(null); // triggers effect to show next
   };
 
   const handleDiscard = () => {
-    toast.info("Transcription discarded.");
-    setPendingResult(null);
+    toast.info(`Discarded ${currentResult?.filename}`);
+    setCurrentResult(null); // triggers effect to show next
   };
 
   return (
@@ -102,10 +116,10 @@ export default function UploadPageForm() {
       </form>
 
       {/* Result Modal */}
-      {pendingResult && (
+      {currentResult && (
         <UploadResultModal
-          filename={pendingResult.filename}
-          transcription={pendingResult.transcription}
+          filename={currentResult.filename}
+          transcription={currentResult.transcription}
           onSend={handleSendToRAG}
           onCancel={handleDiscard}
         />
