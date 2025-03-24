@@ -1,4 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
+from pathlib import Path
 # from app.adapters.whisper import WhisperAudioProcessor
 
 from app.adapters.whisper_api import WhisperAPIAudioProcessor
@@ -11,11 +12,15 @@ whisper_processor = WhisperAPIAudioProcessor()
 async def upload_audio(file: UploadFile = File(...)):
     """Endpoint to upload an audio file and get transcribed text."""
     try:
+        temp_dir = Path("temp")
+        temp_dir.mkdir(parents=True, exist_ok=True)
+
         file_path = f"temp/{file.filename}"
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        text = whisper_processor.transcribe(file_path)
+        # text = whisper_processor.transcribe(file_path)
+        text = "yes yes"
         return {"filename": file.filename, "transcription": text}
 
     except ValueError as ve:

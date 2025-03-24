@@ -25,7 +25,7 @@ export function useAudioUpload() {
         if (language) formData.append("language", language);
         if (rag) formData.append("rag", rag);
 
-        const res = await fetch(`${API_URL}/audio/upload_audio`, {
+        const res = await fetch(`${API_URL}/audio/upload_audio/`, {
           method: "POST",
           body: formData,
         });
