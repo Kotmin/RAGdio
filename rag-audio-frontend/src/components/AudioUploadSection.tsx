@@ -30,6 +30,14 @@ export default function AudioUploadSection({ files, setFiles }: Props) {
       onDragOver={(e) => e.preventDefault()}
       className="neon-border border-4 border-dashed rounded-xl p-4 space-y-4"
     >
+      {/* Counter */}
+      {files.length > 0 && (
+        <p className="text-sm text-gray-600 font-medium">
+          {files.length} file{files.length > 1 ? "s" : ""} added
+        </p>
+      )}
+
+      {/* File gallery */}
       {files.length > 0 && (
         <div className="overflow-x-auto">
           <div className="flex space-x-3 w-fit">
@@ -44,6 +52,7 @@ export default function AudioUploadSection({ files, setFiles }: Props) {
         </div>
       )}
 
+      {/* File upload input */}
       <div className="flex flex-col items-center text-center text-gray-500">
         <button
           type="button"

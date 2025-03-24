@@ -10,6 +10,10 @@ export default function UploadPageForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!files.length) {
+      toast.error("Please add files before submitting.");
+      return;
+    }
     const language = languageRef.current?.value;
     const rag = ragRef.current?.value;
     await uploadFiles(files, language, rag);
