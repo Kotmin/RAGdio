@@ -3,6 +3,12 @@ import { toast } from "react-toastify";
 
 const API_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
+interface UploadResult {
+  filename: string;
+  transcription?: string;
+  error?: string;
+}
+
 export function useAudioUpload() {
   const [loading, setLoading] = useState(false);
 
@@ -10,7 +16,7 @@ export function useAudioUpload() {
     files: File[],
     language?: string,
     rag?: string,
-    onProgress?: (file: File, percent: number) => void,
+    _onProgress?: (file: File, percent: number) => void,
     onSuccess?: (filename: string, transcription: string) => void
   ) => {
     if (!files.length) {
@@ -21,52 +27,44 @@ export function useAudioUpload() {
     setLoading(true);
 
     try {
+      const formData = new FormData();
       for (const file of files) {
-        const formData = new FormData();
-        formData.append("file", file);
-        if (language) formData.append("language", language);
-        if (rag) formData.append("rag", rag);
-
-        const response = await fetch(`${API_URL}/audio/upload_audio/`, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          let errorMessage = `Upload failed for ${file.name}`;
-          try {
-            const errData = await response.json();
-            errorMessage += `: ${errData.detail}`;
-          } catch {
-            const errText = await response.text();
-            errorMessage += `: ${errText}`;
-          }
-          throw new Error(errorMessage);
-        }
-
-        // ✅ Safe JSON parse
-        let data: { filename?: string; transcription?: string };
-        try {
-          data = await response.json();
-          console.log("✅ Upload success:", data);
-        } catch (err) {
-          throw new Error(`Upload succeeded but response is not valid JSON.`);
-        }
-
-        if (!data.transcription || !data.filename) {
-          throw new Error(`Upload succeeded but missing data in response.`);
-        }
-
-        // Show modal per file
-        if (onSuccess) {
-          onSuccess(data.filename, data.transcription);
-        }
-
-        toast.success(`Uploaded ${file.name} ✅`);
+        formData.append("files", file);
       }
+      if (language) formData.append("language", language);
+      if (rag) formData.append("rag", rag);
+
+      const response = await fetch(`${API_URL}/audio/upload_audio/`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Upload failed: ${errText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.results || !Array.isArray(data.results)) {
+        throw new Error("Invalid response from server.");
+      }
+
+      data.results.forEach((result: UploadResult) => {
+        if (result.error) {
+          toast.error(`❌ ${result.filename}: ${result.error}`);
+        } else if (result.transcription) {
+          onSuccess?.(result.filename, result.transcription);
+          toast.success(`✅ ${result.filename} transcribed`);
+        } else {
+          toast.warn(
+            `⚠️ ${result.filename}: No transcription or error received`
+          );
+        }
+      });
     } catch (err: any) {
-      console.error("Upload error2:", err);
-      toast.error(err.message || "Unknown upload error.");
+      toast.error(err.message || "Unknown upload error");
+      console.error("Upload error:", err);
     } finally {
       setLoading(false);
     }
