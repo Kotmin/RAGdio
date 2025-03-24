@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.audio import router as audio_router
+from app.routers.audio import router as audio_router
 from app.core.config import Config
 
 # Initialize FastAPI
