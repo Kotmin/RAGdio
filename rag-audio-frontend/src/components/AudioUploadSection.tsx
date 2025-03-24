@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import FileCard from "./FileCard";
+import { toast } from "react-toastify";
 
 interface Props {
   files: File[];
@@ -11,10 +12,45 @@ export default function AudioUploadSection({ files, setFiles }: Props) {
 
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList) return;
-    const valid = Array.from(fileList).filter((file) =>
-      ["audio/mpeg", "audio/wav", "audio/mp3", "audio/mp4"].includes(file.type)
-    );
-    setFiles([...files, ...valid]);
+    const incoming = Array.from(fileList);
+
+    const SUPPORTED_FORMATS = [
+      "mp3",
+      "mp4",
+      "mpeg",
+      "mpga",
+      "m4a",
+      "wav",
+      "webm",
+    ];
+
+    const newFiles: File[] = [];
+
+    incoming.forEach((file) => {
+      const isDuplicate = files.some(
+        (f) => f.name === file.name && f.size === file.size
+      );
+
+      if (isDuplicate) {
+        toast.warning(`Duplicate file skipped: ${file.name}`);
+        return;
+      }
+
+      if (file.size === 0) {
+        toast.error(`File "${file.name}" is empty.`);
+        return;
+      }
+
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (!ext || !SUPPORTED_FORMATS.includes(ext)) {
+        toast.error(`Unsupported file type: ${file.name}`);
+        return;
+      }
+
+      newFiles.push(file);
+    });
+
+    setFiles([...files, ...newFiles]);
   };
 
   const removeFile = (target: File) => {
@@ -37,10 +73,10 @@ export default function AudioUploadSection({ files, setFiles }: Props) {
         </p>
       )}
 
-      {/* File gallery */}
+      {/* Scrollable / Wrapping file list */}
       {files.length > 0 && (
         <div className="overflow-x-auto">
-          <div className="flex space-x-3 w-fit">
+          <div className="flex flex-wrap gap-3">
             {files.map((file) => (
               <FileCard
                 key={file.name + file.lastModified}
@@ -52,8 +88,8 @@ export default function AudioUploadSection({ files, setFiles }: Props) {
         </div>
       )}
 
-      {/* File upload input */}
-      <div className="flex flex-col items-center text-center text-gray-500">
+      {/* Upload UI */}
+      <div className="flex flex-col items-center text-center text-gray-500 pt-2">
         <button
           type="button"
           onClick={() => inputRef.current?.click()}

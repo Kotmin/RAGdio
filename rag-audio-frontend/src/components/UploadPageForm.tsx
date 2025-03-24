@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import AudioUploadSection from "./AudioUploadSection";
 import { useAudioUpload } from "../hooks/useAudioUpload";
+import { toast } from "react-toastify";
 
 export default function UploadPageForm() {
   const [files, setFiles] = useState<File[]>([]);
@@ -74,11 +75,3 @@ export default function UploadPageForm() {
     </form>
   );
 }
-
-// export default function UploadPageForm() {
-//   return (
-//     <div className="text-center">
-//       <h2 className="text-2xl font-bold">Upload Page Working ✅</h2>
-//     </div>
-//   );
-// }
