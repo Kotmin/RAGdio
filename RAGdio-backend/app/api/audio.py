@@ -33,8 +33,8 @@ async def upload_audio(file: UploadFile = File(...)):
         #     transcription=text
         # )
 
-        # return {"filename": file.filename, "transcription": text}
-        return {"filename": "file ", "transcription": text}
+        return {"filename": file.filename, "transcription": text}
+        # return {"filename": "file ", "transcription": text}
 
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))

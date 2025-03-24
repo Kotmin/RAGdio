@@ -9,7 +9,9 @@ export function useAudioUpload() {
   const uploadFiles = async (
     files: File[],
     language?: string,
-    rag?: string
+    rag?: string,
+    onProgress?: (file: File, percent: number) => void,
+    onSuccess?: (filename: string, transcription: string) => void
   ) => {
     if (!files.length) {
       toast.error("Please select at least one file.");
@@ -25,22 +27,46 @@ export function useAudioUpload() {
         if (language) formData.append("language", language);
         if (rag) formData.append("rag", rag);
 
-        const res = await fetch(`${API_URL}/audio/upload_audio/`, {
+        const response = await fetch(`${API_URL}/audio/upload_audio/`, {
           method: "POST",
           body: formData,
         });
 
-        if (!res.ok) {
-          throw new Error(`Upload failed for ${file.name}`);
+        if (!response.ok) {
+          let errorMessage = `Upload failed for ${file.name}`;
+          try {
+            const errData = await response.json();
+            errorMessage += `: ${errData.detail}`;
+          } catch {
+            const errText = await response.text();
+            errorMessage += `: ${errText}`;
+          }
+          throw new Error(errorMessage);
         }
 
-        const result = await res.json();
-        toast.success(`Uploaded ${file.name}`);
-        console.log(result);
+        // ✅ Safe JSON parse
+        let data: { filename?: string; transcription?: string };
+        try {
+          data = await response.json();
+          console.log("✅ Upload success:", data);
+        } catch (err) {
+          throw new Error(`Upload succeeded but response is not valid JSON.`);
+        }
+
+        if (!data.transcription || !data.filename) {
+          throw new Error(`Upload succeeded but missing data in response.`);
+        }
+
+        // Show modal per file
+        if (onSuccess) {
+          onSuccess(data.filename, data.transcription);
+        }
+
+        toast.success(`Uploaded ${file.name} ✅`);
       }
     } catch (err: any) {
-      toast.error(err.message || "Upload error occurred");
-      console.error(err);
+      console.error("Upload error2:", err);
+      toast.error(err.message || "Unknown upload error.");
     } finally {
       setLoading(false);
     }
