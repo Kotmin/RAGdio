@@ -71,7 +71,7 @@ function App() {
         onClose={() => setOpenDrawer(false)}
         PaperProps={{
           className:
-            "w-full max-w-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 overflow-y-auto",
+            "w-full max-w-md overflow-y-auto bg-white dark:bg-gray-800",
         }}
       >
         <div className="p-4 min-h-screen">
@@ -83,9 +83,6 @@ function App() {
           </div>
           <Divider className="mb-4" />
           <UploadPageForm />
-          <div className="bg-white dark:bg-black text-black dark:text-white p-4 mt-4">
-            Dark mode test block
-          </div>
         </div>
       </Drawer>
     </div>

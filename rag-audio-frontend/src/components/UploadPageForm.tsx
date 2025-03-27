@@ -61,10 +61,10 @@ export default function UploadPageForm() {
   };
 
   return (
-    <>
+    <div className="w-full min-h-screen overflow-y-auto px-4">
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 w-full max-w-3xl mx-auto"
+        className="space-y-6 w-full max-w-3xl mx-auto pb-10"
       >
         <h1 className="text-2xl font-bold text-center">
           Upload Audio for Transcription + RAG
@@ -75,7 +75,7 @@ export default function UploadPageForm() {
 
         {/* Language */}
         <div>
-          <label className="block mb-1 font-medium text-sm text-gray-700">
+          <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-gray-200">
             Language
           </label>
           <select
@@ -93,7 +93,7 @@ export default function UploadPageForm() {
 
         {/* RAG selector */}
         <div>
-          <label className="block mb-1 font-medium text-sm text-gray-700">
+          <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-gray-200">
             RAG Model
           </label>
           <select
@@ -124,6 +124,6 @@ export default function UploadPageForm() {
           onCancel={handleDiscard}
         />
       )}
-    </>
+    </div>
   );
 }
