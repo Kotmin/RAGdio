@@ -2,7 +2,7 @@ import {
   XMarkIcon,
   CheckCircleIcon,
   TrashIcon,
-} from "@heroicons/react/24/solid";
+} from "@heroicons/react/24/outline";
 
 interface Props {
   filename: string;
@@ -18,37 +18,42 @@ export default function UploadResultModal({
   onCancel,
 }: Props) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full relative space-y-4">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-5 space-y-5 relative">
+        {/* Close */}
         <button
           onClick={onCancel}
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
         >
           <XMarkIcon className="w-5 h-5" />
         </button>
 
-        <h3 className="text-lg font-semibold text-gray-800 text-center">
-          Transcription for: <span className="text-purple-600">{filename}</span>
+        {/* Title */}
+        <h3 className="text-base font-semibold text-gray-800 text-center">
+          Transcription of{" "}
+          <span className="text-purple-600 break-all">{filename}</span>
         </h3>
 
-        <div className="max-h-60 overflow-y-auto border rounded p-2 text-sm bg-gray-50">
-          <pre className="whitespace-pre-wrap">{transcription}</pre>
+        {/* Transcription */}
+        <div className="max-h-52 overflow-y-auto border border-gray-200 rounded-md p-3 text-sm bg-gray-50 text-gray-700 whitespace-pre-wrap leading-snug">
+          {transcription}
         </div>
 
+        {/* Actions */}
         <div className="flex justify-between pt-2">
           <button
-            onClick={onSend}
-            className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
-          >
-            <CheckCircleIcon className="w-4 h-4" />
-            Save to RAG
-          </button>
-          <button
             onClick={onCancel}
-            className="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
           >
             <TrashIcon className="w-4 h-4" />
             Discard
+          </button>
+          <button
+            onClick={onSend}
+            className="flex items-center gap-1 px-3 py-1.5 text-sm rounded bg-purple-600 hover:bg-purple-700 text-white shadow"
+          >
+            <CheckCircleIcon className="w-4 h-4" />
+            Save to RAG
           </button>
         </div>
       </div>
