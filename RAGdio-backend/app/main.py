@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers.audio import router as audio_router
+from app.routers.llm import router as llm_router
 from app.core.config import Config
 
 # Initialize FastAPI
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(audio_router, prefix="/api/audio",
                    tags=["Audio Processing"])
 
+app.include_router(llm_router, prefix="/api/llm")
 
 @app.get("/")
 def health_check():
