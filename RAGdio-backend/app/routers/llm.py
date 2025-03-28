@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from typing import Optional, AsyncGenerator
 import asyncio
 import json
+import textwrap
+
+
 
 router = APIRouter()
 
@@ -17,13 +20,22 @@ class ChatResponse(BaseModel):
 
 # Simulate word-by-word async response (mocking LLM stream)
 async def generate_stream_response(prompt: str) -> AsyncGenerator[str, None]:
-    text = f'''
-    \nHello!
-    You asked: {prompt}. Here’s a long streaming reply...
-    '''
-    for word in text.split():
-        yield word + " "
-        await asyncio.sleep(0.1)
+    text = textwrap.dedent(f"""
+    ## Hello!
+
+    Here's a Python example:
+
+    ```python
+    def hello():
+        print("Hello world!")
+    ```
+
+    Let me know if you need anything else.
+    """).strip()
+    for line in text.splitlines():
+        yield line + "\n"
+        await asyncio.sleep(0.05)
+
 
 @router.post("/chat/stream")
 async def stream_chat_response(request: Request):
@@ -46,3 +58,4 @@ async def stream_chat_response(request: Request):
         yield "\n[END_METADATA] " + json.dumps(metadata)
 
     return StreamingResponse(streamer(), media_type="text/plain")
+

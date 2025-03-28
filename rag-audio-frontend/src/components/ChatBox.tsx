@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { streamChatResponse } from "../hooks/useStreamingChat";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -134,7 +135,7 @@ export default function ChatBox() {
             <div
               key={msg.id}
               className={`flex ${isUser ? "justify-end" : "justify-start"} ${
-                isNewBlock ? "mt-4" : ""
+                isNewBlock ? "mt-6 mb-4" : "my-"
               }`}
             >
               <div
@@ -144,11 +145,29 @@ export default function ChatBox() {
                     : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100"
                 }`}
               >
-                {msg.sender === "ai" ? (
-                  <ReactMarkdown>{msg.content || ""}</ReactMarkdown>
-                ) : (
-                  msg.content
-                )}
+                <div className="mt-4 mb-4 prose prose-sm dark:prose-invert max-w-none break-words whitespace-pre-wrap">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        return (
+                          <code
+                            className={`rounded px-1 py-0.5 text-sm ${
+                              inline
+                                ? "bg-gray-100 dark:bg-gray-800"
+                                : "block bg-gray-900 text-white p-2 overflow-auto"
+                            }`}
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {msg.content || ""}
+                  </ReactMarkdown>
+                </div>
 
                 {/* Copy to clipboard */}
                 {msg.sender === "ai" && !msg.streaming && (
@@ -173,20 +192,23 @@ export default function ChatBox() {
 
                 {/* Metadata toggle */}
                 {msg.sender === "ai" && msg.metadata && !msg.streaming && (
-                  <button
-                    onClick={() => toggleMetadata(msg.id)}
-                    className="absolute bottom-2 right-[100px] text-gray-400 hover:text-purple-500 text-xs"
-                    title="Toggle metadata"
-                  >
-                    {msg.showMetadata ? (
-                      <ChevronUpIcon className="w-4 h-4 inline-block" />
-                    ) : (
-                      <ChevronDownIcon className="w-4 h-4 inline-block" />
-                    )}
-                  </button>
+                  <div className="mt-1 mb-4 flex justify-end pr-10">
+                    <button
+                      onClick={() => toggleMetadata(msg.id)}
+                      className="text-gray-400 hover:text-purple-500 text-xs flex items-center gap-1"
+                      title="Toggle metadata"
+                    >
+                      {msg.showMetadata ? (
+                        <ChevronUpIcon className="w-4 h-4 inline-block" />
+                      ) : (
+                        <ChevronDownIcon className="w-4 h-4 inline-block" />
+                      )}
+                      <span>Metadata</span>
+                    </button>
+                  </div>
                 )}
 
-                {/* Metadata view */}
+                {/* Metadata display */}
                 {msg.sender === "ai" &&
                   msg.metadata &&
                   msg.showMetadata &&
@@ -202,13 +224,14 @@ export default function ChatBox() {
 
         {loading && (
           <div className="text-sm text-gray-500 dark:text-gray-400">
-            Assistant is typing...
+            Assistant is typing...{" "}
+            {/* <button className="ml-2 underline text-xs">Stop</button> */}
           </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
+      {/* Input area */}
       <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
         <div className="flex items-end gap-2">
           <textarea
