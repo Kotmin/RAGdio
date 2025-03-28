@@ -17,7 +17,10 @@ class ChatResponse(BaseModel):
 
 # Simulate word-by-word async response (mocking LLM stream)
 async def generate_stream_response(prompt: str) -> AsyncGenerator[str, None]:
-    text = f"Hello! You asked: {prompt}. Here’s a long streaming reply..."
+    text = f'''
+    \nHello!
+    You asked: {prompt}. Here’s a long streaming reply...
+    '''
     for word in text.split():
         yield word + " "
         await asyncio.sleep(0.1)

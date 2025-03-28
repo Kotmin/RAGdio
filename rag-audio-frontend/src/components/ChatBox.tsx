@@ -9,6 +9,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { streamChatResponse } from "../hooks/useStreamingChat";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string;
@@ -25,8 +26,8 @@ export default function ChatBox() {
   const [loading, setLoading] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -83,6 +84,13 @@ export default function ChatBox() {
     });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
   const toggleMetadata = (msgId: string) => {
     setMessages((prev) =>
       prev.map((msg) =>
@@ -97,84 +105,100 @@ export default function ChatBox() {
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
-
   const clearChat = () => {
     setMessages([]);
     setInput("");
   };
 
+  const isScrolledToBottom = () => {
+    const el = containerRef.current;
+    return el ? el.scrollHeight - el.scrollTop - el.clientHeight < 50 : false;
+  };
+
+  useEffect(() => {
+    if (isScrolledToBottom()) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, loading]);
+
   return (
     <div className="flex flex-col h-[80vh] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow overflow-hidden">
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.sender === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={containerRef}>
+        {messages.map((msg, idx) => {
+          const isUser = msg.sender === "user";
+          const previous = messages[idx - 1];
+          const isNewBlock = !previous || previous.sender !== msg.sender;
+
+          return (
             <div
-              className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap relative ${
-                msg.sender === "user"
-                  ? "bg-white border-2 border-purple-400 text-gray-800 dark:bg-gray-900 dark:text-white"
-                  : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100"
+              key={msg.id}
+              className={`flex ${isUser ? "justify-end" : "justify-start"} ${
+                isNewBlock ? "mt-4" : ""
               }`}
             >
-              {msg.content}
-
-              {/* Clipboard copy button */}
-              {msg.sender === "ai" && !msg.streaming && (
-                <button
-                  onClick={() => handleCopy(msg.id, msg.content)}
-                  className="absolute top-1 right-2 text-gray-400 hover:text-purple-500 text-xs"
-                  title="Copy to clipboard"
-                >
-                  {copiedId === msg.id ? (
-                    <CheckCircleIcon className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <ClipboardIcon className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-
-              {/* Metadata toggle button */}
-              {msg.sender === "ai" && !msg.streaming && msg.metadata && (
-                <button
-                  onClick={() => toggleMetadata(msg.id)}
-                  className="absolute bottom-1 right-2 text-gray-400 hover:text-purple-500 text-xs"
-                  title="Toggle metadata"
-                >
-                  {msg.showMetadata ? (
-                    <ChevronUpIcon className="w-4 h-4 inline-block" />
-                  ) : (
-                    <ChevronDownIcon className="w-4 h-4 inline-block" />
-                  )}
-                </button>
-              )}
-
-              {/* Metadata content */}
-              {msg.sender === "ai" &&
-                msg.metadata &&
-                msg.showMetadata &&
-                !msg.streaming && (
-                  <pre className="text-xs mt-2 p-2 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-40 overflow-auto">
-                    {JSON.stringify(msg.metadata, null, 2)}
-                  </pre>
+              <div
+                className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap relative ${
+                  isUser
+                    ? "bg-white border-2 border-purple-400 text-gray-800 dark:bg-gray-900 dark:text-white"
+                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100"
+                }`}
+              >
+                {msg.sender === "ai" ? (
+                  <ReactMarkdown>{msg.content || ""}</ReactMarkdown>
+                ) : (
+                  msg.content
                 )}
+
+                {/* Copy to clipboard */}
+                {msg.sender === "ai" && !msg.streaming && (
+                  <button
+                    onClick={() => handleCopy(msg.id, msg.content)}
+                    className="absolute top-2 right-2 flex items-center gap-1 text-xs text-gray-400 hover:text-purple-500"
+                    title="Copy to clipboard"
+                  >
+                    {copiedId === msg.id ? (
+                      <>
+                        <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                        <span className="text-green-500">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ClipboardIcon className="w-4 h-4" />
+                        <span>Copy</span>
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Metadata toggle */}
+                {msg.sender === "ai" && msg.metadata && !msg.streaming && (
+                  <button
+                    onClick={() => toggleMetadata(msg.id)}
+                    className="absolute bottom-2 right-[100px] text-gray-400 hover:text-purple-500 text-xs"
+                    title="Toggle metadata"
+                  >
+                    {msg.showMetadata ? (
+                      <ChevronUpIcon className="w-4 h-4 inline-block" />
+                    ) : (
+                      <ChevronDownIcon className="w-4 h-4 inline-block" />
+                    )}
+                  </button>
+                )}
+
+                {/* Metadata view */}
+                {msg.sender === "ai" &&
+                  msg.metadata &&
+                  msg.showMetadata &&
+                  !msg.streaming && (
+                    <pre className="text-xs mt-2 p-2 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-40 overflow-auto">
+                      {JSON.stringify(msg.metadata, null, 2)}
+                    </pre>
+                  )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {loading && (
           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -184,7 +208,7 @@ export default function ChatBox() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
+      {/* Input */}
       <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 space-y-2">
         <div className="flex items-end gap-2">
           <textarea
@@ -204,7 +228,6 @@ export default function ChatBox() {
           </button>
         </div>
 
-        {/* Chat actions */}
         <div className="flex justify-between items-center text-xs text-gray-400">
           <div className="flex gap-2">
             <button onClick={clearChat} className="hover:text-red-500">
@@ -237,7 +260,7 @@ export default function ChatBox() {
         </div>
       </div>
 
-      {/* Footer / settings */}
+      {/* Footer */}
       {showFooter && (
         <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 space-y-3">
           <p className="font-semibold text-xs">⚙️ Settings & Info</p>
