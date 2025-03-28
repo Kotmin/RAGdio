@@ -3,11 +3,21 @@ import {
   PaperAirplaneIcon,
   MicrophoneIcon,
   Cog6ToothIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ClipboardIcon,
+  CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 
+const API_URL = import.meta.env.VITE_API_BASE_URL || "/api/";
+
 interface Message {
+  id: string;
   sender: "user" | "ai";
   content: string;
+  streaming?: boolean;
+  metadata?: Record<string, any>;
+  showMetadata?: boolean;
 }
 
 export default function ChatBox() {
@@ -15,25 +25,103 @@ export default function ChatBox() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
   const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const animateAssistantReply = (
+    fullText: string,
+    msgId: string,
+    metadata?: Record<string, any>
+  ) => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === msgId ? { ...m, content: fullText.slice(0, i) } : m
+        )
+      );
+
+      if (i >= fullText.length) {
+        clearInterval(interval);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === msgId
+              ? { ...m, content: fullText, streaming: false, metadata }
+              : m
+          )
+        );
+      }
+
+      i++;
+    }, 5);
+  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMessage: Message = { sender: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const userId = crypto.randomUUID();
+    const aiId = crypto.randomUUID();
+
+    const userMessage: Message = {
+      id: userId,
+      sender: "user",
+      content: input,
+    };
+    const aiPlaceholder: Message = {
+      id: aiId,
+      sender: "ai",
+      content: "",
+      streaming: true,
+    };
+
+    setMessages((prev) => [...prev, userMessage, aiPlaceholder]);
     setInput("");
     setLoading(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiMessage: Message = {
-        sender: "ai",
-        content: `Echo: ${userMessage.content}`,
-      };
-      setMessages((prev) => [...prev, aiMessage]);
+    try {
+      const res = await fetch(`${API_URL}/llm/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: input }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error (${res.status})`);
+      }
+
+      const data = await res.json();
+      animateAssistantReply(data.response, aiId, data.metadata || {});
+    } catch (err: any) {
+      console.error("LLM Error:", err);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === aiId
+            ? {
+                ...m,
+                content: `⚠️ Error fetching assistant response: ${err.message}`,
+                streaming: false,
+              }
+            : m
+        )
+      );
+    } finally {
       setLoading(false);
-    }, 800);
+    }
+  };
+
+  const toggleMetadata = (msgId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === msgId ? { ...msg, showMetadata: !msg.showMetadata } : msg
+      )
+    );
+  };
+
+  const handleCopy = (msgId: string, content: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(msgId);
+    setTimeout(() => setCopiedId(null), 1500);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -56,24 +144,65 @@ export default function ChatBox() {
     <div className="flex flex-col h-[80vh] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow overflow-hidden">
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg, idx) => (
+        {messages.map((msg) => (
           <div
-            key={idx}
+            key={msg.id}
             className={`flex ${
               msg.sender === "user" ? "justify-end" : "justify-start"
             }`}
           >
             <div
-              className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+              className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap relative ${
                 msg.sender === "user"
                   ? "bg-white border-2 border-purple-400 text-gray-800 dark:bg-gray-900 dark:text-white"
                   : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-100"
               }`}
             >
               {msg.content}
+
+              {/* Clipboard copy button */}
+              {msg.sender === "ai" && !msg.streaming && (
+                <button
+                  onClick={() => handleCopy(msg.id, msg.content)}
+                  className="absolute top-1 right-2 text-gray-400 hover:text-purple-500 text-xs"
+                  title="Copy to clipboard"
+                >
+                  {copiedId === msg.id ? (
+                    <CheckCircleIcon className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <ClipboardIcon className="w-4 h-4" />
+                  )}
+                </button>
+              )}
+
+              {/* Metadata toggle button (only AI) */}
+              {msg.sender === "ai" && !msg.streaming && msg.metadata && (
+                <button
+                  onClick={() => toggleMetadata(msg.id)}
+                  className="absolute bottom-1 right-2 text-gray-400 hover:text-purple-500 text-xs"
+                  title="Toggle metadata"
+                >
+                  {msg.showMetadata ? (
+                    <ChevronUpIcon className="w-4 h-4 inline-block" />
+                  ) : (
+                    <ChevronDownIcon className="w-4 h-4 inline-block" />
+                  )}
+                </button>
+              )}
+
+              {/* Metadata content */}
+              {msg.sender === "ai" &&
+                msg.metadata &&
+                msg.showMetadata &&
+                !msg.streaming && (
+                  <pre className="text-xs mt-2 p-2 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 max-h-40 overflow-auto">
+                    {JSON.stringify(msg.metadata, null, 2)}
+                  </pre>
+                )}
             </div>
           </div>
         ))}
+
         {loading && (
           <div className="text-sm text-gray-500 dark:text-gray-400">
             Assistant is typing...
