@@ -8,8 +8,7 @@ import {
   ClipboardIcon,
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
-
-const API_URL = import.meta.env.VITE_API_BASE_URL || "/api/";
+import { streamChatResponse } from "../hooks/useStreamingChat";
 
 interface Message {
   id: string;
@@ -28,34 +27,6 @@ export default function ChatBox() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
-  const animateAssistantReply = (
-    fullText: string,
-    msgId: string,
-    metadata?: Record<string, any>
-  ) => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === msgId ? { ...m, content: fullText.slice(0, i) } : m
-        )
-      );
-
-      if (i >= fullText.length) {
-        clearInterval(interval);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === msgId
-              ? { ...m, content: fullText, streaming: false, metadata }
-              : m
-          )
-        );
-      }
-
-      i++;
-    }, 5);
-  };
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -79,35 +50,37 @@ export default function ChatBox() {
     setInput("");
     setLoading(true);
 
-    try {
-      const res = await fetch(`${API_URL}/llm/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Server error (${res.status})`);
-      }
-
-      const data = await res.json();
-      animateAssistantReply(data.response, aiId, data.metadata || {});
-    } catch (err: any) {
-      console.error("LLM Error:", err);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === aiId
-            ? {
-                ...m,
-                content: `⚠️ Error fetching assistant response: ${err.message}`,
-                streaming: false,
-              }
-            : m
-        )
-      );
-    } finally {
-      setLoading(false);
-    }
+    await streamChatResponse(input, "default", {
+      onToken: (chunk) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiId ? { ...m, content: (m.content || "") + chunk } : m
+          )
+        );
+      },
+      onDone: (metadata) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiId ? { ...m, streaming: false, metadata } : m
+          )
+        );
+        setLoading(false);
+      },
+      onError: (err) => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiId
+              ? {
+                  ...m,
+                  streaming: false,
+                  content: `⚠️ Error: ${err}`,
+                }
+              : m
+          )
+        );
+        setLoading(false);
+      },
+    });
   };
 
   const toggleMetadata = (msgId: string) => {
@@ -175,7 +148,7 @@ export default function ChatBox() {
                 </button>
               )}
 
-              {/* Metadata toggle button (only AI) */}
+              {/* Metadata toggle button */}
               {msg.sender === "ai" && !msg.streaming && msg.metadata && (
                 <button
                   onClick={() => toggleMetadata(msg.id)}
@@ -231,7 +204,7 @@ export default function ChatBox() {
           </button>
         </div>
 
-        {/* Chat actions + settings */}
+        {/* Chat actions */}
         <div className="flex justify-between items-center text-xs text-gray-400">
           <div className="flex gap-2">
             <button onClick={clearChat} className="hover:text-red-500">
@@ -264,11 +237,10 @@ export default function ChatBox() {
         </div>
       </div>
 
-      {/* Expandable footer */}
+      {/* Footer / settings */}
       {showFooter && (
         <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-200 space-y-3">
           <p className="font-semibold text-xs">⚙️ Settings & Info</p>
-
           <div className="text-xs space-y-1">
             <p className="text-gray-500 dark:text-gray-400">
               🧠 <strong>Model selector</strong> — coming soon
