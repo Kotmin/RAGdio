@@ -8,6 +8,7 @@ class Config:
     """App configuration settings."""
 
     ASR_MODEL = os.getenv("ASR_MODEL", "whisper-api")  # Default: Whisper
+    VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "qdrant")
     DEBUG = os.getenv("DEBUG", "False").lower(
     ) == "true"  # Convert string to bool
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")

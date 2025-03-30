@@ -1,4 +1,4 @@
-from langchain.vectorstores import Qdrant
+from langchain_community.vectorstores import Qdrant
 from langchain.embeddings.base import Embeddings
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
