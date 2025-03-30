@@ -1,5 +1,3 @@
-# services/vectorstore_factory.py
-
 from app.core.config import Config
 from app.adapters.vectorstores.qdrant_adapter import QdrantVectorStoreAdapter
 # from app.adapters.vectorstores.chroma_adapter import ChromaVectorStoreAdapter

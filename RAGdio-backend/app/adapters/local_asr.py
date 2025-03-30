@@ -1,5 +1,5 @@
 from langchain.schema import Document
-from langchain.llms import HuggingFacePipeline
+from langchain_community.llms import HuggingFacePipeline
 from transformers import pipeline
 from app.services.audio_processor import AudioProcessor
 
