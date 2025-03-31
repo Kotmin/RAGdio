@@ -6,7 +6,7 @@ import asyncio
 import json
 import textwrap
 
-
+from app.services.rag_pipeline import RAGPipelineService
 
 router = APIRouter()
 
@@ -37,15 +37,15 @@ async def generate_stream_response(prompt: str) -> AsyncGenerator[str, None]:
         await asyncio.sleep(0.05)
 
 
-@router.post("/chat/stream")
+@router.post("/chat/stream/test")
 async def stream_chat_response(request: Request):
     data = await request.json()
     prompt = data.get("prompt", "")
-    rag = data.get("ragModel", "default")
+    rag = data.get("ragModel", "default") # feature: some particular collection
 
     # Simulated metadata
     metadata = {
-        "tokens_used": len(prompt.split()) + 10,
+        "tokens_used": len(prompt.split()) + 10, # TODO maybe some proper calc?
         "rag_model": rag,
         "source": "mock",
     }
@@ -56,6 +56,28 @@ async def stream_chat_response(request: Request):
 
         # Send special JSON metadata token at end of stream
         yield "\n[END_METADATA] " + json.dumps(metadata)
+
+    return StreamingResponse(streamer(), media_type="text/plain")
+
+
+
+
+pipeline = RAGPipelineService()
+
+
+# TODO Request to ChatRequest?
+@router.post("/chat/stream")
+async def stream_chat_response(req: Request):
+    data = await req.json()
+    prompt = data.get("prompt")
+
+    rag_result = pipeline.query(prompt)
+
+    async def streamer():
+        for line in rag_result["answer"].splitlines():
+            yield line + "\n"
+            await asyncio.sleep(0.02)
+        yield "\n[END_METADATA] " + json.dumps({"documents": rag_result["context_docs"]})
 
     return StreamingResponse(streamer(), media_type="text/plain")
 

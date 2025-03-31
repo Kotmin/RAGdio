@@ -1,5 +1,5 @@
 from app.adapters.embeddings.base import EmbeddingAdapter
-from langchain.embeddings import HuggingFaceEmbeddings
+
 
 
 class HuggingFaceEmbeddingAdapter(EmbeddingAdapter):
@@ -7,4 +7,13 @@ class HuggingFaceEmbeddingAdapter(EmbeddingAdapter):
         self.model_name = model_name
 
     def get_embedder(self):
+        try:
+            from langchain.embeddings import HuggingFaceEmbeddings
+        except ImportError:
+            raise ImportError(
+                "HuggingFaceEmbeddings requires `sentence-transformers`. "
+                "Install it with `pip install sentence-transformers`."
+            )
         return HuggingFaceEmbeddings(model_name=self.model_name)
+
+

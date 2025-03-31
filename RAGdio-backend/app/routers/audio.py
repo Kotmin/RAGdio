@@ -10,6 +10,10 @@ from app.services.audio_factory import AudioProcessorFactory
 router = APIRouter()
 # whisper_processor = WhisperAudioProcessor()
 # transcribe_processor = WhisperAPIAudioProcessor()
+
+from app.services.rag_pipeline import RAGPipelineService
+
+pipeline = RAGPipelineService()
 transcribe_processor = AudioProcessorFactory()
 
 
@@ -76,3 +80,15 @@ async def upload_audio(files: List[UploadFile] = File(...)):
     # return {"filename": file.filename, "transcription": transcription}
     # return {"filename": "file ", "transcription": transcription}
 
+
+# TODO guess that payload should be defined
+@router.post("/rag/ingest")
+async def manual_ingest(payload: dict):
+    transcription = payload.get("transcription")
+    metadata = payload.get("metadata", {})
+
+    if not transcription:
+        raise HTTPException(status_code=400, detail="Missing transcription.")
+
+    pipeline.ingest_text(transcription, metadata)
+    return {"status": "ok"}
