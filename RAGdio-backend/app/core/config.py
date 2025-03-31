@@ -7,9 +7,10 @@ load_dotenv(override=True)
 class Config:
     """App configuration settings."""
 
-    ASR_MODEL = os.getenv("ASR_MODEL", "whisper-api")  # Default: Whisper
+    ASR_MODEL = os.getenv("ASR_MODEL", "whisper-api")  # alt: Whisper
     VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "qdrant")
     EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "huggingface")
+    LLM_PROVIDER_TYPE = os.getenv("EMBEDDING_BACKEND", "openai") # alt: local
     DEBUG = os.getenv("DEBUG", "False").lower(
     ) == "true"  # Convert string to bool
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
