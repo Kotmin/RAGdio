@@ -11,7 +11,8 @@ services:
     env_file:
       - ./RAGdio-backend/.env
     depends_on:
-      - qdrant
+      qdrant:
+        condition: service_healthy
     restart: always
 
   qdrant:
@@ -23,6 +24,23 @@ services:
     volumes:
       - qdrant_data:/qdrant/storage
     restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/collections"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: vite-dev.Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+
 
 volumes:
   qdrant_data:
