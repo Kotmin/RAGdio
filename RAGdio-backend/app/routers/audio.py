@@ -4,9 +4,13 @@ from typing import List
 # from app.adapters.whisper import WhisperAudioProcessor
 
 from app.adapters.whisper_api import WhisperAPIAudioProcessor
+
+from app.services.audio_factory import AudioProcessorFactory
+
 router = APIRouter()
 # whisper_processor = WhisperAudioProcessor()
-transcribe_processor = WhisperAPIAudioProcessor()
+# transcribe_processor = WhisperAPIAudioProcessor()
+transcribe_processor = AudioProcessorFactory()
 
 
 
