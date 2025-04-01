@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers.audio import router as audio_router
 from app.routers.llm import router as llm_router
 from app.core.config import Config
+from app.core.logging_config import logger
+
 
 # Initialize FastAPI
 app = FastAPI(title="RAG Over Audio",
