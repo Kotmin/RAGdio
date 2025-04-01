@@ -6,6 +6,8 @@ from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from .base import ChatModelAdapter
 from app.core.config import Config
 
+from app.core.logging_config import logger
+
 class OpenAIChatAdapter(ChatModelAdapter):
     def __init__(self):
         self.llm = ChatOpenAI(
@@ -16,5 +18,9 @@ class OpenAIChatAdapter(ChatModelAdapter):
         self.chain = load_qa_with_sources_chain(self.llm, chain_type="stuff")
 
     def ask(self, query: str, context_docs: List[Document]) -> str:
+        if not context_docs:
+            logger.info("No context docs provided. Using raw LLM without RAG.")
+            return self.llm.invoke(query).content
+    
         result = self.chain.invoke({"input_documents": context_docs, "question": query})
         return result.get("answer", "No answer.")
