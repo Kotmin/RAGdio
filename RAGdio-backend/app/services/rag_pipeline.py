@@ -5,6 +5,7 @@ from app.services.audio_factory import AudioProcessorFactory
 
 from langchain.schema import Document
 from pathlib import Path
+from app.core.logging_config import logger
 
 class RAGPipelineService:
     def __init__(self):
@@ -21,8 +22,14 @@ class RAGPipelineService:
         retriever = self.vectorstore.as_retriever()
         docs = retriever.invoke(user_input)
         if not docs:
-            return {"answer": "⚠️ No relevant documents found.", "context_docs": []}
+            logger.warning("No documents retrieved. Falling back to direct LLM call.")
+            answer = self.llm.ask(user_input, [])  # or empty context
+            return {
+                "answer": f"(No context) {answer}",
+                "context_docs": []
+            }
 
+        logger.info(f"Retrieved {len(docs)} context docs for query: {user_input}")
         answer = self.llm.ask(user_input, docs)
         return {
             "answer": answer,
