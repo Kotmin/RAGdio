@@ -8,7 +8,7 @@ class OpenAIEmbeddingAdapter(EmbeddingAdapter):
 
     def get_embedder(self):
         try:
-            from langchain_community.embeddings import OpenAIEmbeddings
+            from langchain_openai import OpenAIEmbeddings
         except ImportError:
             raise ImportError(
                 "OpenAIEmbeddings requires `openai`. Install it with `pip install openai`."

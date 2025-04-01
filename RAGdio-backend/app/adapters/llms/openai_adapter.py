@@ -1,5 +1,6 @@
 from typing import List
-from langchain_community.chat_models.openai import ChatOpenAI
+# from langchain_community.chat_models.openai import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.schema import Document
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from .base import ChatModelAdapter
@@ -15,5 +16,5 @@ class OpenAIChatAdapter(ChatModelAdapter):
         self.chain = load_qa_with_sources_chain(self.llm, chain_type="stuff")
 
     def ask(self, query: str, context_docs: List[Document]) -> str:
-        result = self.chain({"input_documents": context_docs, "question": query}, return_only_outputs=True)
+        result = self.chain.invoke({"input_documents": context_docs, "question": query})
         return result.get("answer", "No answer.")
