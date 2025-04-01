@@ -20,6 +20,9 @@ class RAGPipelineService:
     def query(self, user_input: str) -> dict:
         retriever = self.vectorstore.as_retriever()
         docs = retriever.invoke(user_input)
+        if not docs:
+            return {"answer": "⚠️ No relevant documents found.", "context_docs": []}
+
         answer = self.llm.ask(user_input, docs)
         return {
             "answer": answer,
