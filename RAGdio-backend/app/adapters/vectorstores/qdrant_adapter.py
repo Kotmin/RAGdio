@@ -55,8 +55,8 @@ class QdrantVectorStoreAdapter(VectorStoreAdapter):
                 if Config.DEBUG:
                     raise ValueError(msg)
                 else:
-                    logging.warning(msg)
-                    logging.warning("⚠️ Recreating collection with new embedding size")
+                    logger.warning(msg)
+                    logger.warning("⚠️ Recreating collection with new embedding size")
 
                     self.client.recreate_collection(
                         collection_name=self.collection_name,
@@ -70,7 +70,7 @@ class QdrantVectorStoreAdapter(VectorStoreAdapter):
         #         vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
         #     )
         except UnexpectedResponse as e:
-            logging.warning(f"Collection '{self.collection_name}' does not exist, creating it.")
+            logger.warning(f"Collection '{self.collection_name}' does not exist, creating it.")
             self.client.recreate_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
@@ -87,7 +87,7 @@ class QdrantVectorStoreAdapter(VectorStoreAdapter):
         try:
             self.db.add_documents(docs)
         except Exception as e:
-            logging.error(f"❌ Failed to add documents to Qdrant: {e}")
+            logger.error(f"❌ Failed to add documents to Qdrant: {e}")
             if Config.DEBUG:
                 raise
 
