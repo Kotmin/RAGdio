@@ -8,6 +8,7 @@ interface TranscriptionResult {
   filename: string;
   transcription: string;
 }
+const API_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 export default function UploadPageForm() {
   const [files, setFiles] = useState<File[]>([]);
@@ -50,9 +51,32 @@ export default function UploadPageForm() {
     }
   }, [currentResult, pendingResults]);
 
-  const handleSendToRAG = () => {
-    toast.success(`Saved ${currentResult?.filename} to RAG`);
-    setCurrentResult(null); // triggers effect to show next
+  const handleSendToRAG = async () => {
+    if (!currentResult) return;
+
+    try {
+      const response = await fetch(`${API_URL}/audio/rag/ingest`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transcription: currentResult.transcription,
+          metadata: {
+            filename: currentResult.filename,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send to RAG: ${await response.text()}`);
+      }
+
+      toast.success(`Saved ${currentResult.filename} to RAG`);
+    } catch (error: any) {
+      console.error("RAG ingestion error:", error);
+      toast.error(`Failed to save ${currentResult.filename}: ${error.message}`);
+    } finally {
+      setCurrentResult(null); // triggers effect to show next
+    }
   };
 
   const handleDiscard = () => {
