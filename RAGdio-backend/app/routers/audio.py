@@ -14,7 +14,7 @@ router = APIRouter()
 from app.services.rag_pipeline import RAGPipelineService
 
 pipeline = RAGPipelineService()
-transcribe_processor = AudioProcessorFactory()
+transcribe_processor = AudioProcessorFactory().get_audio_processor()
 
 
 
@@ -55,8 +55,8 @@ async def upload_audio(files: List[UploadFile] = File(...)):
             buffer.write(await file.read())
 
         try:
-            # transcription = transcribe_processor.transcribe(file_path)
-            transcription = "yes yes" *32
+            transcription = transcribe_processor.transcribe(file_path)
+            # transcription = "yes yes" *32
             results.append({
                 "filename": file.filename,
                 "transcription": transcription
