@@ -98,17 +98,6 @@ class AudioIngestRequest(BaseModel):
     metadata: AudioIngestMetadata
 
 
-# TODO guess that payload should be defined
-# @router.post("/rag/ingest")
-# async def manual_ingest(payload: dict):
-#     transcription = payload.get("transcription")
-#     metadata = payload.get("metadata", {})
-
-#     if not transcription:
-#         raise HTTPException(status_code=400, detail="Missing transcription.")
-
-#     pipeline.ingest_text(transcription, metadata)
-#     return {"status": "ok"}
 @router.post("/rag/ingest/")
 async def manual_ingest(payload: AudioIngestRequest):
     transcription = payload.transcription
