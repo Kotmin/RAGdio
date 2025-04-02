@@ -27,9 +27,23 @@ class OpenAIChatAdapter(ChatModelAdapter):
             if "source" not in doc.metadata:
                 doc.metadata["source"] = doc.metadata.get("filename", "Unknown Source")
 
-        result = self.chain.invoke({
-            "input_documents": context_docs,
-            "question": query,
-        })
-        return result.get("answer", "No answer.")
+        # result = self.chain.invoke({
+        #     "input_documents": context_docs,
+        #     "question": query,
+        # })
+        # return result.get("answer", "No answer.")
+
+        try:
+            result = self.chain.invoke({
+                "input_documents": context_docs,
+                "question": query,
+            })
+
+            logger.debug(f"QA Chain result: {result}")
+
+            return result.get("answer") or result.get("output_text") or "No answer."
+
+        except Exception as e:
+            logger.exception("Error during OpenAI QA chain invocation")
+            return "⚠️ Failed to get an answer from the model."
 
