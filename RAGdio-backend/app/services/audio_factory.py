@@ -2,6 +2,7 @@ from app.services.audio_processor import AudioProcessor
 from app.adapters.whisper_api import WhisperAPIAudioProcessor
 from app.adapters.local_asr import LocalASRProcessor
 from app.core.config import Config
+from app.core.logging_config import logger
 
 try:
     from app.adapters.whisper import WhisperAudioProcessor

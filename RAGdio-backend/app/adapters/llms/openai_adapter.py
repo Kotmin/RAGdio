@@ -17,10 +17,19 @@ class OpenAIChatAdapter(ChatModelAdapter):
         )
         self.chain = load_qa_with_sources_chain(self.llm, chain_type="stuff")
 
+    
     def ask(self, query: str, context_docs: List[Document]) -> str:
         if not context_docs:
             logger.info("No context docs provided. Using raw LLM without RAG.")
             return self.llm.invoke(query).content
-    
-        result = self.chain.invoke({"input_documents": context_docs, "question": query})
+        
+        for doc in context_docs:
+            if "source" not in doc.metadata:
+                doc.metadata["source"] = doc.metadata.get("filename", "Unknown Source")
+
+        result = self.chain.invoke({
+            "input_documents": context_docs,
+            "question": query,
+        })
         return result.get("answer", "No answer.")
+

@@ -81,14 +81,51 @@ async def upload_audio(files: List[UploadFile] = File(...)):
     # return {"filename": "file ", "transcription": transcription}
 
 
+from pydantic import BaseModel, Field
+from typing import Optional
+from app.core.config import Config
+from app.core.logging_config import logger
+
+class AudioIngestMetadata(BaseModel):
+    filename: str
+    language: Optional[str] = None
+    rag: Optional[str] = None
+    source: Optional[str] = None  # Optional, but we’ll auto-fill if missing
+
+
+class AudioIngestRequest(BaseModel):
+    transcription: str = Field(..., min_length=1)
+    metadata: AudioIngestMetadata
+
+
 # TODO guess that payload should be defined
-@router.post("/rag/ingest")
-async def manual_ingest(payload: dict):
-    transcription = payload.get("transcription")
-    metadata = payload.get("metadata", {})
+# @router.post("/rag/ingest")
+# async def manual_ingest(payload: dict):
+#     transcription = payload.get("transcription")
+#     metadata = payload.get("metadata", {})
 
-    if not transcription:
-        raise HTTPException(status_code=400, detail="Missing transcription.")
+#     if not transcription:
+#         raise HTTPException(status_code=400, detail="Missing transcription.")
 
-    pipeline.ingest_text(transcription, metadata)
-    return {"status": "ok"}
+#     pipeline.ingest_text(transcription, metadata)
+#     return {"status": "ok"}
+@router.post("/rag/ingest/")
+async def manual_ingest(payload: AudioIngestRequest):
+    transcription = payload.transcription
+    metadata = payload.metadata.dict()
+
+    # Ensure source is filled — fallback to filename
+    if not metadata.get("source"):
+        metadata["source"] = metadata.get("filename", "unknown")
+
+    try:
+        pipeline.ingest_text(transcription, metadata)
+        logger.info(f"Ingested transcription from {metadata['filename']}")
+        return {"status": "ok"}
+
+    except Exception as e:
+        logger.exception("Failed to ingest transcription")
+        if Config.DEBUG:
+            raise HTTPException(status_code=500, detail=str(e))
+        else:
+            raise HTTPException(status_code=500, detail="Failed to ingest transcription.")
