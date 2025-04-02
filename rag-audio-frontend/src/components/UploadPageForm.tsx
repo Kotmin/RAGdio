@@ -54,14 +54,20 @@ export default function UploadPageForm() {
   const handleSendToRAG = async () => {
     if (!currentResult) return;
 
+    const language = languageRef.current?.value || "unknown";
+    const rag = ragRef.current?.value || "default";
+
     try {
-      const response = await fetch(`${API_URL}/audio/rag/ingest`, {
+      const response = await fetch(`${API_URL}/audio/rag/ingest/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcription: currentResult.transcription,
           metadata: {
             filename: currentResult.filename,
+            language,
+            rag,
+            source: currentResult.filename || "unknown",
           },
         }),
       });
@@ -70,10 +76,12 @@ export default function UploadPageForm() {
         throw new Error(`Failed to send to RAG: ${await response.text()}`);
       }
 
-      toast.success(`Saved ${currentResult.filename} to RAG`);
+      toast.success(`✅ Saved ${currentResult.filename} to RAG`);
     } catch (error: any) {
       console.error("RAG ingestion error:", error);
-      toast.error(`Failed to save ${currentResult.filename}: ${error.message}`);
+      toast.error(
+        `❌ Failed to save ${currentResult.filename}: ${error.message}`
+      );
     } finally {
       setCurrentResult(null); // triggers effect to show next
     }
