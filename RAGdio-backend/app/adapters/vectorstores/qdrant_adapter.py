@@ -14,6 +14,7 @@ import os
 import logging
 from app.core.config import Config
 
+from app.core.logging_config import logger
 
 class QdrantVectorStoreAdapter(VectorStoreAdapter):
     def __init__(self, embedding_model: Embeddings, collection_name="rag_audio_collection"):
@@ -40,7 +41,11 @@ class QdrantVectorStoreAdapter(VectorStoreAdapter):
         # Check existing collection (if exists)
         try:
             info = self.client.get_collection(self.collection_name)
-            existing_dim = info.vectors_size
+            # logging.warning(f"⚠️ Could not determine existing vector size for collection '{info}'")
+            # existing_dim = info.vectors_size
+            # existing_dim = info.config.params.size
+            existing_dim = info.config.params.vectors.size
+
 
             if existing_dim != embedding_dim:
                 msg = (
