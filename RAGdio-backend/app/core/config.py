@@ -11,8 +11,13 @@ class Config:
     VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "qdrant")
     EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "huggingface") #alt: openai
     LLM_PROVIDER_TYPE = os.getenv("EMBEDDING_BACKEND", "openai") # alt: local
+    LLM_RAG_MODE = os.getenv("LLM_RAG_MODE", "rag_fallback")  # rag_fallback or rag_strict
+
+
     DEBUG = os.getenv("DEBUG", "False").lower(
     ) == "true"  # Convert string to bool
+
+
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
     @classmethod
