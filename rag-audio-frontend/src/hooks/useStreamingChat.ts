@@ -32,7 +32,6 @@ export async function streamChatResponse(
       const chunk = decoder.decode(value, { stream: true });
       buffer += chunk;
 
-      // Check if metadata is at the end
       const endMarker = "\n[END_METADATA] ";
       if (buffer.includes(endMarker)) {
         const [textPart, metadataPart] = buffer.split(endMarker);
@@ -46,7 +45,7 @@ export async function streamChatResponse(
         break;
       }
 
-      options.onToken(chunk);
+      // options.onToken(chunk);
     }
   } catch (err: any) {
     console.error("Streaming error:", err);

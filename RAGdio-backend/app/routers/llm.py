@@ -75,13 +75,10 @@ async def stream_chat_response(req: Request):
     sources = rag_result.get("context_docs", [])
 
     async def streamer():
-        for line in rag_result["answer"].splitlines():
-            yield line + "\n"
-            await asyncio.sleep(0.02)
-        # yield "\n[END_METADATA] " + json.dumps({"documents": rag_result["context_docs"]})
-        yield "\n[END_METADATA] " + json.dumps({
-            "sources": sources
-        })
+        yield rag_result["answer"] + "\n"
+        await asyncio.sleep(0.01)
+        # ✅ Send metadata separately
+        yield "\n[END_METADATA] " + json.dumps({"sources": sources})
 
     return StreamingResponse(streamer(), media_type="text/plain")
 
