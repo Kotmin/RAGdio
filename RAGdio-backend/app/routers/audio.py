@@ -1,9 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from pathlib import Path
 from typing import List
+from asyncio import to_thread
 # from app.adapters.whisper import WhisperAudioProcessor
 
-from app.adapters.whisper_api import WhisperAPIAudioProcessor
+# from app.adapters.whisper_api import WhisperAPIAudioProcessor
 
 from app.services.audio_factory import AudioProcessorFactory
 
@@ -46,16 +47,16 @@ async def upload_audio(files: List[UploadFile] = File(...)):
         if ext not in SUPPORTED_FORMATS:
             raise HTTPException(status_code=400, detail=f"Unsupported format: {file.filename}")
         
-
-    # prevent collisions?
-    # import uuid
-    # file_path = f"temp/{uuid.uuid4()}.{ext}"
         file_path = f"temp/{file.filename}"
         with open(file_path, "wb") as buffer:
             buffer.write(await file.read())
 
         try:
-            transcription = transcribe_processor.transcribe(file_path)
+
+
+            transcription = await to_thread(transcribe_processor.transcribe, file_path)
+
+            # transcription = transcribe_processor.transcribe(file_path)
             # transcription = "yes yes" *32
             results.append({
                 "filename": file.filename,
@@ -67,18 +68,10 @@ async def upload_audio(files: List[UploadFile] = File(...)):
                 "error": str(e)
             })
         finally:
-            # print("ok")
             Path(file_path).unlink(missing_ok=True)
 
     return {"results": results}
-            # Return structured response
-    # return SendFileResponse(
-    #     filename=file.filename,
-    #     transcription=transcription
-    # )
 
-    # return {"filename": file.filename, "transcription": transcription}
-    # return {"filename": "file ", "transcription": transcription}
 
 
 from pydantic import BaseModel, Field
