@@ -1,7 +1,8 @@
 
 from langchain.embeddings.base import Embeddings
 
-from langchain_qdrant import Qdrant
+# from langchain_qdrant import Qdrant
+from langchain_qdrant import QdrantVectorStore as Qdrant
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
 from qdrant_client.http.exceptions import UnexpectedResponse
@@ -80,7 +81,7 @@ class QdrantVectorStoreAdapter(VectorStoreAdapter):
         self.db = Qdrant(
             client=self.client,
             collection_name=self.collection_name,
-            embeddings=self.embedding_model,
+            embedding=self.embedding_model,
         )
 
     def add_documents(self, docs: List[Document]) -> None:
