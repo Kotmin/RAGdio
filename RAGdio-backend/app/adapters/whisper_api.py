@@ -5,6 +5,7 @@ from openai import OpenAI
 from pydub import AudioSegment
 from app.services.audio_processor import AudioProcessor
 
+from app.core.logging_config import logger
 
 class WhisperAPIAudioProcessor(AudioProcessor):
     """Whisper API ASR implementation."""
@@ -42,6 +43,7 @@ class WhisperAPIAudioProcessor(AudioProcessor):
     def transcribe(self, audio_file: str) -> str:
         """Transcribes audio using Whisper API with error handling & chunking."""
         try:
+            logger.info(f"Using Whisper API")
             if not self._is_supported_format(audio_file):
                 raise ValueError(
                     f"Unsupported file format. Supported formats: {self.SUPPORTED_FORMATS}")
