@@ -22,7 +22,7 @@ class AudioProcessorFactory:
             if not whisper_available:
                 raise ValueError(
                     "Whisper is not installed. Set ASR_MODEL=whisper_api or install Whisper.")
-            return WhisperAudioProcessor(model_size="large")
+            return WhisperAudioProcessor(model_size="small")
         elif model_name == "whisper-api":
             return WhisperAPIAudioProcessor()
         elif model_name == "wav2vec":
