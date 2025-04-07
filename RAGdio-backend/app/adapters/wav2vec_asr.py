@@ -1,65 +1,74 @@
 import os
-import tempfile
+import warnings
+import numpy as np
 from pathlib import Path
-
-import torch
-import torchaudio
 from pydub import AudioSegment
 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+import torch
 
-from app.core.logging_config import logger
 from app.services.audio_processor import AudioProcessor
+from app.core.logging_config import logger
 
 
 class Wav2VecASRProcessor(AudioProcessor):
-    """
-    Offline ASR using Wav2Vec2 (facebook/wav2vec2-large-xlsr-53).
-    Handles English, Polish and more via PyDub + Transformers.
-    """
+    """Offline Wav2Vec2 ASR processor (English + Polish capable)."""
 
-    MODEL_NAME = "facebook/wav2vec2-large-xlsr-53"
-    SUPPORTED_FORMATS = {"mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"}
+    SUPPORTED_INPUT_FORMATS = {"mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"}
 
-    def __init__(self):
-        logger.info(f"📥 Loading Wav2Vec2 model: {self.MODEL_NAME}")
-        self.processor = Wav2Vec2Processor.from_pretrained(self.MODEL_NAME)
-        self.model = Wav2Vec2ForCTC.from_pretrained(self.MODEL_NAME)
-        self.model.eval()
+    def __init__(self, model_name="facebook/wav2vec2-large-xlsr-53"):
+        self.model_dir = Path("/app/models") / model_name.replace("/", "-")
+        if not self.model_dir.exists():
+            # fallback for dev/local
+            fallback = Path("./models") / model_name.replace("/", "-")
+            if fallback.exists():
+                self.model_dir = fallback
+            else:
+                raise FileNotFoundError(f"❌ Model not found at {self.model_dir} or {fallback}")
 
-    def _convert_to_wav(self, input_path: str) -> str:
-        """Converts input audio to 16kHz mono WAV format for Wav2Vec."""
-        ext = input_path.split(".")[-1].lower()
-        if ext not in self.SUPPORTED_FORMATS:
-            raise ValueError(f"Unsupported file format: .{ext}")
+        logger.info(f"✅ Using Wav2Vec2 model from: {self.model_dir}")
 
-        audio = AudioSegment.from_file(input_path)
-        audio = audio.set_channels(1).set_frame_rate(16000)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
-        audio.export(temp_wav.name, format="wav")
-        logger.debug(f"Converted '{input_path}' to WAV at {temp_wav.name}")
-        return temp_wav.name
+        self.processor = Wav2Vec2Processor.from_pretrained(str(self.model_dir))
+        self.model = Wav2Vec2ForCTC.from_pretrained(str(self.model_dir)).to(self.device)
 
-    def transcribe(self, audio_file: str, language: str = "en") -> str:
-        """Transcribes audio using local Wav2Vec2 model."""
+    def _load_audio_as_array(self, input_path: str) -> np.ndarray:
+        """Loads audio from any supported format and returns float32 numpy array."""
+        ext = Path(input_path).suffix.lower().replace('.', '')
+        if ext not in self.SUPPORTED_INPUT_FORMATS:
+            raise ValueError(
+                f"Unsupported file format '{ext}'. Supported formats: {self.SUPPORTED_INPUT_FORMATS}"
+            )
+
+        audio = AudioSegment.from_file(input_path, format=ext)
+        audio = audio.set_frame_rate(16000).set_channels(1)
+
+        samples = np.array(audio.get_array_of_samples()).astype(np.float32)
+        samples /= np.iinfo(audio.array_type).max  # normalize to [-1, 1]
+        return samples
+
+    def transcribe(self, audio_file: str) -> str:
+        """Transcribe audio using Wav2Vec2."""
         try:
-            wav_path = self._convert_to_wav(audio_file)
-            waveform, sample_rate = torchaudio.load(wav_path)
+            logger.info(f"🔊 Transcribing with Wav2Vec2: {audio_file}")
+            speech_array = self._load_audio_as_array(audio_file)
 
-            if sample_rate != 16000:
-                raise RuntimeError("Audio sample rate must be 16kHz")
+            inputs = self.processor(
+                speech_array,
+                sampling_rate=16000,
+                return_tensors="pt",
+                padding=True
+            ).input_values.to(self.device)
 
-            inputs = self.processor(waveform.squeeze(), sampling_rate=16000, return_tensors="pt")
             with torch.no_grad():
-                logits = self.model(**inputs).logits
+                logits = self.model(inputs).logits
 
             predicted_ids = torch.argmax(logits, dim=-1)
             transcription = self.processor.batch_decode(predicted_ids)[0]
 
-            logger.info(f"✅ Transcription complete (chars: {len(transcription.strip())})")
-            os.remove(wav_path)
+            logger.info(f"📝 Transcription complete for: {audio_file}")
             return transcription.strip()
 
         except Exception as e:
-            logger.exception("Wav2Vec2 transcription failed")
-            return f"[Wav2Vec2 error] {e}"
+            logger.exception(f"❌ Wav2Vec2 transcription failed for {audio_file}")
+            return f"Wav2Vec2 error: {e}"
