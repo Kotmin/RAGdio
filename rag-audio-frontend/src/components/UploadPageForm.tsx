@@ -105,23 +105,23 @@ export default function UploadPageForm() {
         {/* Audio File Section */}
         <AudioUploadSection files={files} setFiles={setFiles} />
 
-        {/* Language */}
-        <div>
-          <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-gray-200">
-            Language
-          </label>
-          <select
-            ref={languageRef}
-            className="w-full rounded border px-3 py-2"
-            defaultValue="en"
-          >
-            <option value="en">English</option>
-            <option value="pl">Polish</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-          </select>
-        </div>
+        {/* Language
+        // <div>
+        //   <label className="block mb-1 font-medium text-sm text-gray-700 dark:text-gray-200">
+        //     Language
+        //   </label>
+        //   <select
+        //     ref={languageRef}
+        //     className="w-full rounded border px-3 py-2"
+        //     defaultValue="en"
+        //   >
+        //     <option value="en">English</option>
+        //     <option value="pl">Polish</option>
+        //     <option value="es">Spanish</option>
+        //     <option value="fr">French</option>
+        //     <option value="de">German</option>
+        //   </select>
+        // </div> */}
 
         {/* RAG selector */}
         <div>
@@ -134,7 +134,7 @@ export default function UploadPageForm() {
             defaultValue="default"
           >
             <option value="default">Default (Qdrant + GPT-4)</option>
-            <option value="local">Local Model</option>
+            {/* <option value="local">Local Model</option> */}
           </select>
         </div>
 
