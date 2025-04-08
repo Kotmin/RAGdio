@@ -38,6 +38,13 @@ export default function ChatBox() {
     return newId;
   });
 
+  useEffect(() => {
+    const stored = localStorage.getItem("chat_id");
+    if (stored && stored !== chatId) {
+      setChatId(stored);
+    }
+  }, []);
+
   const sendMessage = async () => {
     if (!input.trim()) return;
 
@@ -69,6 +76,11 @@ export default function ChatBox() {
         );
       },
       onDone: (metadata) => {
+        if (metadata?.chat_id && metadata.chat_id !== chatId) {
+          setChatId(metadata.chat_id);
+          localStorage.setItem("chat_id", metadata.chat_id);
+        }
+
         setMessages((prev) =>
           prev.map((m) =>
             m.id === aiId ? { ...m, streaming: false, metadata } : m
@@ -76,6 +88,7 @@ export default function ChatBox() {
         );
         setLoading(false);
       },
+
       onError: (err) => {
         setMessages((prev) =>
           prev.map((m) =>

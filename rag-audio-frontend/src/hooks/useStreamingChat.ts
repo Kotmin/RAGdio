@@ -1,4 +1,5 @@
 interface StreamingOptions {
+  chatId?: string;
   onToken: (token: string) => void;
   onDone?: (metadata?: Record<string, any>) => void;
   onError?: (err: string) => void;
@@ -15,7 +16,7 @@ export async function streamChatResponse(
     const res = await fetch(`${API_URL}/llm/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, ragModel }),
+      body: JSON.stringify({ prompt, ragModel, chat_id: options.chatId }),
     });
 
     if (!res.body) throw new Error("No response body");
