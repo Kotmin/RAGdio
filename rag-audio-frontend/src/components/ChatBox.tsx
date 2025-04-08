@@ -9,6 +9,7 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 import { streamChatResponse } from "../hooks/useStreamingChat";
+// import LoadingDots from "react-loading-dots";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -29,6 +30,13 @@ export default function ChatBox() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [chatId, setChatId] = useState<string>(() => {
+    const existing = localStorage.getItem("chat_id");
+    if (existing) return existing;
+    const newId = crypto.randomUUID();
+    localStorage.setItem("chat_id", newId);
+    return newId;
+  });
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -36,23 +44,23 @@ export default function ChatBox() {
     const userId = crypto.randomUUID();
     const aiId = crypto.randomUUID();
 
-    const userMessage: Message = {
-      id: userId,
-      sender: "user",
-      content: input,
-    };
-    const aiPlaceholder: Message = {
-      id: aiId,
-      sender: "ai",
-      content: "",
-      streaming: true,
-    };
+    let currentChatId = chatId;
+    if (!currentChatId) {
+      currentChatId = crypto.randomUUID();
+      setChatId(currentChatId);
+    }
 
-    setMessages((prev) => [...prev, userMessage, aiPlaceholder]);
+    setMessages((prev) => [
+      ...prev,
+      { id: userId, sender: "user", content: input },
+      { id: aiId, sender: "ai", content: "", streaming: true },
+    ]);
+
     setInput("");
     setLoading(true);
 
     await streamChatResponse(input, "default", {
+      chatId: currentChatId,
       onToken: (chunk) => {
         setMessages((prev) =>
           prev.map((m) =>
@@ -227,6 +235,9 @@ export default function ChatBox() {
             Assistant is typing...{" "}
             {/* <button className="ml-2 underline text-xs">Stop</button> */}
           </div>
+          // <div className="text-sm text-gray-400 dark:text-gray-500 flex items-center gap-2">
+          //   Assistant is typing <LoadingDots dots={3} />
+          // </div>
         )}
         <div ref={bottomRef} />
       </div>

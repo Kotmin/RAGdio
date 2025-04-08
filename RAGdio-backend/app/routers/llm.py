@@ -2,8 +2,10 @@ from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional, AsyncGenerator
+# from collections import defaultdict,deque
 import asyncio
 import json
+import uuid
 import textwrap
 
 from app.services.rag_pipeline import RAGPipelineService
@@ -12,6 +14,7 @@ router = APIRouter()
 
 class ChatRequest(BaseModel):
     prompt: str
+    chat_id: Optional[str] = None
     ragModel: Optional[str] = "default"
 
 class ChatResponse(BaseModel):
@@ -65,20 +68,39 @@ async def stream_chat_response(request: Request):
 pipeline = RAGPipelineService()
 
 
-# TODO Request to ChatRequest?
-@router.post("/chat/stream")
-async def stream_chat_response(req: Request):
-    data = await req.json()
-    prompt = data.get("prompt")
 
-    rag_result = pipeline.query(prompt)
+from app.services.chat_memory import (
+    append_turn, build_prompt, get_chat_context
+)
+
+@router.post("/chat/stream")
+async def stream_chat_response(payload: ChatRequest):
+    chat_id = payload.chat_id or str(uuid.uuid4())
+    prompt = payload.prompt
+
+    append_turn(chat_id, "user", prompt)
+    full_prompt = build_prompt(chat_id, prompt)
+    
+    rag_result = pipeline.query(full_prompt)
+    answer = rag_result["answer"]
     sources = rag_result.get("context_docs", [])
 
+    append_turn(chat_id, "assistant", answer)
+
     async def streamer():
-        yield rag_result["answer"] + "\n"
+        yield answer + "\n"
         await asyncio.sleep(0.01)
-        # ✅ Send metadata separately
-        yield "\n[END_METADATA] " + json.dumps({"sources": sources})
+
+        context = get_chat_context(chat_id)
+        # Convert deque to list for JSON serialization
+        serializable_context = {
+            "turns": list(context["turns"]),
+            "summary": context["summary"],
+            "context": context["context"],
+            "chat_id": chat_id,
+            "sources": sources,
+        }
+
+        yield "\n[END_METADATA] " + json.dumps(serializable_context)
 
     return StreamingResponse(streamer(), media_type="text/plain")
-
