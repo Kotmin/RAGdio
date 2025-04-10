@@ -15,7 +15,8 @@ class Wav2VecASRProcessor(AudioProcessor):
 
     SUPPORTED_INPUT_FORMATS = {"mp3", "mp4", "mpeg", "mpga", "m4a", "wav", "webm"}
 
-    def __init__(self, model_name="facebook/wav2vec2-large-xlsr-53"):
+    # def __init__(self, model_name="facebook/wav2vec2-large-xlsr-53"):
+    def __init__(self, model_name="facebook/wav2vec2-large-xlsr-960h"):
         self.model_dir = Path("/app/models") / model_name.replace("/", "-")
         if not self.model_dir.exists():
             # fallback for dev/local
