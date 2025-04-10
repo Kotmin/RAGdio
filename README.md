@@ -17,3 +17,10 @@ LLM_RAG_MODE=rag_fallback  # rag_fallback or rag_strict
 - "rag_strict" – LLM can only answer from documents
 
 - "rag_fallback" – If docs are not useful or missing, LLM falls back to its own knowledge
+
+
+## Run local ollama Zephyr
+```bash
+docker exec -it ollama ollama pull zephyr
+```
+Inside docker compose we have ollama instance, we can
