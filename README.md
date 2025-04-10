@@ -12,7 +12,7 @@ EMBEDDING_BACKEND=huggingface   # Options: huggingface, openai
 LLM_PROVIDER_TYPE=openai # Options openai,ollama,deepseek,local
 LLM_RAG_MODE=rag_fallback  # rag_fallback or rag_strict
 LOCAL_OLLM_API_URL=
-LOCAL_OLLM_MODEL=zaphyr
+LOCAL_OLLM_MODEL=zephyr
 ```
 
 ## LLM RAG MODES (if available)
