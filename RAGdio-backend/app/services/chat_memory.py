@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from app.core.logging_config import logger
 
 # Store only per-chat session (up to 10 turns), not user-specific
 chat_history = defaultdict(lambda: {
@@ -15,6 +16,30 @@ def append_turn(chat_id: str, role: str, content: str):
         "role": role,
         "content": content,
     })
+
+def auto_summarize(chat_id: str):
+    store = chat_history[chat_id]
+    if len(store["turns"]) < 4:
+        return  # wait for more conversation
+
+    history_lines = []
+    for turn in store["turns"]:
+        role = "User" if turn["role"] == "user" else "Assistant"
+        history_lines.append(f"{role}: {turn['content']}")
+
+    full_history = "\n".join(history_lines)
+
+    summary_prompt = (
+        "Please summarize the following chat history in bulletpoints:\n\n"
+        f"{full_history}"
+    )
+
+    try:
+        summary = pipeline.llm.ask(summary_prompt, [])
+        chat_history[chat_id]["summary"] = summary.strip()
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to auto-summarize: {e}")
+
 
 def build_prompt(chat_id: str, user_input: str):
     store = chat_history[chat_id]

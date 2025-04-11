@@ -70,7 +70,7 @@ pipeline = RAGPipelineService()
 
 
 from app.services.chat_memory import (
-    append_turn, build_prompt, get_chat_context
+    append_turn, build_prompt, get_chat_context,auto_summarize
 )
 from app.core.config import Config
 
@@ -92,6 +92,7 @@ async def stream_chat_response(payload: ChatRequest):
     sources = rag_result.get("context_docs", [])
 
     append_turn(chat_id, "assistant", answer)
+    auto_summarize(chat_id)
 
     async def streamer():
         yield answer + "\n"
