@@ -14,8 +14,8 @@ from app.adapters.llms.deepseek_adapter import DeepSeekChatAdapter
 def get_chat_model() -> ChatModelAdapter:
     model_name = Config.LLM_PROVIDER_TYPE.lower()
 
-    # if model_name == "openai":
-    #     return OpenAIChatAdapter()
+    if model_name == "openai":
+        return OpenAIChatAdapter()
     if model_name == "ollama":
         return OllamaChatAdapter()
     if model_name == "deepseek":

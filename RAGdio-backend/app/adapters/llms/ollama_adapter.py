@@ -7,8 +7,6 @@ from app.core.logging_config import logger
 
 
 class OllamaChatAdapter(ChatModelAdapter):
-    """Adapter for local Ollama-based LLMs like Zephyr or Deepseek."""
-
     def __init__(self):
         self.model = Config.LOCAL_OLLM_MODEL or "zephyr"
         self.url = Config.LOCAL_OLLM_API_URL or "http://ollama:11434/api/generate"
@@ -34,8 +32,8 @@ class OllamaChatAdapter(ChatModelAdapter):
             logger.info(f"🦙 Calling Ollama model '{self.model}' at {self.url}")
             response = requests.post(
                 self.url,
-                json={"model": self.model, "prompt": prompt},
-                timeout=30
+                json={"model": self.model, "prompt": prompt, "stream": False},
+                timeout=360
             )
             response.raise_for_status()
             result = response.json()
