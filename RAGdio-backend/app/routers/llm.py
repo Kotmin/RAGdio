@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional, AsyncGenerator
-# from collections import defaultdict,deque
+
 import asyncio
 import json
 import uuid
@@ -72,6 +72,8 @@ pipeline = RAGPipelineService()
 from app.services.chat_memory import (
     append_turn, build_prompt, get_chat_context
 )
+from app.core.config import Config
+
 
 @router.post("/chat/stream")
 async def stream_chat_response(payload: ChatRequest):
@@ -80,6 +82,10 @@ async def stream_chat_response(payload: ChatRequest):
 
     append_turn(chat_id, "user", prompt)
     full_prompt = build_prompt(chat_id, prompt)
+
+    # use_memory = Config.LLM_PROVIDER_TYPE.lower() in ("openai",)  # OpenAI has own function to query
+
+    # query_input = full_prompt if use_memory else prompt
     
     rag_result = pipeline.query(full_prompt)
     answer = rag_result["answer"]

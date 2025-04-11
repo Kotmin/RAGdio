@@ -1,5 +1,4 @@
 from typing import List
-# from langchain_community.chat_models.openai import ChatOpenAI
 from langchain_openai import ChatOpenAI
 from langchain.schema import Document
 from langchain.chains.qa_with_sources import load_qa_with_sources_chain
