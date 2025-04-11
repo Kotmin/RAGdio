@@ -72,7 +72,13 @@ LOCAL_OLLM_API_URL=http://localhost:11434/api/generate
 DEBUG=true
 ```
 
----
+## ⚙️ .env Example (`rag-audio-frontend.env`)
+
+```env
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+## VITE_API_BASE_URL=http://localhost:8000/api
 
 ## 📦 Supported ASR + LLM Backends
 
