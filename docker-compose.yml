@@ -42,7 +42,7 @@ services:
     volumes:
       - ./rag-audio-frontend:/app
     environment:
-      - VITE_API_BASE_URL=rag_audio_backend:8000/api
+      - VITE_API_BASE_URL=fastapi:8000/api
 
   ollama:
     image: ollama/ollama
