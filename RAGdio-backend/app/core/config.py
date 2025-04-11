@@ -10,10 +10,10 @@ class Config:
     ASR_MODEL = os.getenv("ASR_MODEL", "whisper-api")  # alt: Whisper
     VECTOR_BACKEND = os.getenv("VECTOR_BACKEND", "qdrant")
     EMBEDDING_BACKEND = os.getenv("EMBEDDING_BACKEND", "huggingface") #alt: openai
-    LLM_PROVIDER_TYPE = os.getenv("LLM_PROVIDER", "openai") # alt: local, zephyr, deepseek
+    LLM_PROVIDER_TYPE = os.getenv("LLM_PROVIDER_TYPE", "openai") # alt: local, ollama, deepseek
     LLM_RAG_MODE = os.getenv("LLM_RAG_MODE", "rag_fallback")  # rag_fallback or rag_strict
-    LOCAL_OLLM_API_URL = os.getenv("LOCAL_LLM_API_URL", "http://localhost:11434/api/generate") 
-    LOCAL_OLLM_MODEL = os.getenv("LOCAL_LLM_MODEL", "zephyr")
+    LOCAL_OLLM_API_URL = os.getenv("LOCAL_OLLM_API_URL", "http://localhost:11434/api/generate") 
+    LOCAL_OLLM_MODEL = os.getenv("LOCAL_OLLM_MODEL", "zephyr")
 
 
     DEBUG = os.getenv("DEBUG", "False").lower(

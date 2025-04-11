@@ -8,7 +8,7 @@ class HuggingFaceEmbeddingAdapter(EmbeddingAdapter):
 
     def get_embedder(self):
         try:
-            from langchain.embeddings import HuggingFaceEmbeddings
+            from langchain_community.embeddings import HuggingFaceEmbeddings
         except ImportError:
             raise ImportError(
                 "HuggingFaceEmbeddings requires `sentence-transformers`. "
