@@ -21,15 +21,15 @@ LOCAL_OLLM_MODEL=zephyr
 
 - "rag_fallback" – If docs are not useful or missing, LLM falls back to its own knowledge
 
-
 ## Run local ollama Zephyr
+
 ```bash
 docker exec -it ollama ollama pull zephyr
 ```
+
 Inside docker compose we have ollama instance, we can set any model
 
 ## TEST
-
 
 # 🎧 RAGdio – Audio-First RAG with Local + Cloud AI
 
@@ -76,20 +76,20 @@ DEBUG=true
 
 ## 📦 Supported ASR + LLM Backends
 
-| Component        | Options                                  |
-|------------------|------------------------------------------|
-| Transcription    | `whisper`, `whisper-api`                 |
-| Embeddings       | `huggingface`, `openai`                  |
-| Vector DB        | `qdrant` (with Docker)                   |
-| LLM Backends     | `openai`, `ollama`, `deepseek`, `local`  |
+| Component     | Options                                 |
+| ------------- | --------------------------------------- |
+| Transcription | `whisper`, `whisper-api`                |
+| Embeddings    | `huggingface`, `openai`                 |
+| Vector DB     | `qdrant` (with Docker)                  |
+| LLM Backends  | `openai`, `ollama`, `deepseek`, `local` |
 
 ---
 
 ## 🧠 LLM RAG Modes
 
-| Mode         | Description                                                                  |
-|--------------|------------------------------------------------------------------------------|
-| `rag_strict` | LLM must only answer using provided documents                                |
+| Mode           | Description                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| `rag_strict`   | LLM must only answer using provided documents                               |
 | `rag_fallback` | LLM can fallback to its own knowledge if context is unclear or insufficient |
 
 ---
@@ -123,6 +123,7 @@ docker exec -it ollama ollama pull zephyr
 ```
 
 .env:
+
 ```env
 LLM_PROVIDER_TYPE=ollama
 LOCAL_OLLM_MODEL=zephyr
@@ -149,6 +150,7 @@ LOCAL_OLLM_MODEL=zephyr
 #### Setup
 
 .env:
+
 ```env
 LLM_PROVIDER_TYPE=deepseek
 ```
@@ -162,10 +164,12 @@ Same test flow as Scenario 1.
 ### ✅ Scenario 3: Fully Remote (OpenAI)
 
 .env:
+
 ```env
 ASR_MODEL=whisper-api
 OPENAI_API_KEY=sk-...
 VECTOR_BACKEND=qdrant
+QDRANT_HOST=qdrant
 EMBEDDING_BACKEND=openai
 LLM_PROVIDER_TYPE=openai
 LLM_RAG_MODE=rag_fallback
@@ -183,6 +187,7 @@ No local models needed. Ideal for low-resource devices.
 - Shared to LLM as part of prompt (unless using OpenAI’s own chain)
 
 Sample structure:
+
 ```json
 {
   "chat_id": "uuid...",
@@ -196,13 +201,13 @@ Sample structure:
 
 ## 💾 System Requirements
 
-| Stack                  | Disk Usage | RAM       | VRAM      |
-|------------------------|------------|-----------|-----------|
-| `ollama + zephyr`      | ~3.5 GB    | ~3 GB     | ~1 GB     |
-| `deepseek-7b-chat`     | ~13–15 GB  | 8–16 GB   | ~10 GB    |
-| `OpenAI (API)`         | None       | ~500 MB   | None      |
-| `Whisper (medium)`     | ~2 GB      | ~2–3 GB   | ~1–2 GB   |
-| `Qdrant`               | ~300 MB    | ~300 MB   | None      |
+| Stack              | Disk Usage | RAM     | VRAM    |
+| ------------------ | ---------- | ------- | ------- |
+| `ollama + zephyr`  | ~3.5 GB    | ~3 GB   | ~1 GB   |
+| `deepseek-7b-chat` | ~13–15 GB  | 8–16 GB | ~10 GB  |
+| `OpenAI (API)`     | None       | ~500 MB | None    |
+| `Whisper (medium)` | ~2 GB      | ~2–3 GB | ~1–2 GB |
+| `Qdrant`           | ~300 MB    | ~300 MB | None    |
 
 ---
 
