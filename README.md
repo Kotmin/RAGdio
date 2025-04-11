@@ -42,7 +42,7 @@ Inside docker compose we have ollama instance, we can set any model
 ## 🚀 Quick Start (with Docker)
 
 ```bash
-git clone https://github.com/your-org/RAGdio
+git clone https://github.com/Kotmin/RAGdio
 cd RAGdio
 docker compose up --build
 ```
