@@ -281,7 +281,12 @@ export default function ChatBox() {
               Clear chat
             </button>
             <button
-              onClick={() => setMessages([])}
+              onClick={() => {
+                const newId = crypto.randomUUID();
+                setChatId(newId);
+                localStorage.setItem("chat_id", newId);
+                setMessages([]);
+              }}
               className="hover:text-blue-500"
             >
               New topic
