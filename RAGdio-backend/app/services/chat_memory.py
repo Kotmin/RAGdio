@@ -1,6 +1,8 @@
 from collections import defaultdict, deque
 from app.core.logging_config import logger
 
+from app.routers.llm import pipeline
+
 # Store only per-chat session (up to 10 turns), not user-specific
 chat_history = defaultdict(lambda: {
     "turns": deque(maxlen=10),   # rolling memory
@@ -19,7 +21,7 @@ def append_turn(chat_id: str, role: str, content: str):
 
 def auto_summarize(chat_id: str):
     store = chat_history[chat_id]
-    if len(store["turns"]) < 4:
+    if len(store["turns"]) < 2:
         return  # wait for more conversation
 
     history_lines = []
@@ -35,7 +37,10 @@ def auto_summarize(chat_id: str):
     )
 
     try:
-        summary = pipeline.llm.ask(summary_prompt, [])
+        # summary = pipeline.llm.ask(summary_prompt, [])
+        result = pipeline.query(summary_prompt)
+        summary = result["answer"]
+        # summary = summarize_func(summary_prompt)
         chat_history[chat_id]["summary"] = summary.strip()
     except Exception as e:
         logger.warning(f"⚠️ Failed to auto-summarize: {e}")

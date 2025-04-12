@@ -33,7 +33,7 @@ class OllamaChatAdapter(ChatModelAdapter):
             response = requests.post(
                 self.url,
                 json={"model": self.model, "prompt": prompt, "stream": False},
-                timeout=360
+                timeout=720
             )
             response.raise_for_status()
             result = response.json()
