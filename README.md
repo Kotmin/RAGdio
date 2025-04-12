@@ -1,41 +1,20 @@
-# RAGdio
-
-Embed and query your documents.
-
-## Example backend .env file
-
-```
-ASR_MODEL=whisper-api  # Options: whisper, whisper-api, (in future) deepgram, huggingface, local
-OPENAI_API_KEY=key
-VECTOR_BACKEND=qdrant # Options: qdrant, chroma(in future)
-EMBEDDING_BACKEND=huggingface   # Options: huggingface, openai
-LLM_PROVIDER_TYPE=openai # Options openai,ollama,deepseek,local
-LLM_RAG_MODE=rag_fallback  # rag_fallback or rag_strict
-LOCAL_OLLM_API_URL=
-LOCAL_OLLM_MODEL=zephyr
-```
-
-## LLM RAG MODES (if available)
-
-- "rag_strict" – LLM can only answer from documents
-
-- "rag_fallback" – If docs are not useful or missing, LLM falls back to its own knowledge
-
-## Run local ollama Zephyr
-
-```bash
-docker exec -it ollama ollama pull zephyr
-```
-
-Inside docker compose we have ollama instance, we can set any model
-
-## TEST
-
 # 🎧 RAGdio – Audio-First RAG with Local + Cloud AI
 
 **RAGdio** is an audio-focused RAG (Retrieval-Augmented Generation) framework combining transcription, semantic search, and multiple LLM backends — both local and cloud-based.
 
 > 💡 Built with clean code, adapters, interfaces, and a minimal full-stack (FastAPI + Vite).
+
+
+<p align="center">
+  <img 
+    src="./docs/media/rag_mem_short.gif" 
+    alt="query RAG + memory" 
+    width="80%" 
+    style="border-radius: 8px;" 
+  />
+</p>
+
+Chat with memory/history feature (available in API and Local models)
 
 ---
 
@@ -71,6 +50,13 @@ LOCAL_OLLM_API_URL=http://localhost:11434/api/generate
 
 DEBUG=true
 ```
+
+### LLM RAG MODES (if available)
+
+- "rag_strict" – LLM can only answer from documents
+
+- "rag_fallback" – If docs are not useful or missing, LLM falls back to its own knowledge
+
 
 ## ⚙️ .env Example (`rag-audio-frontend.env`)
 
@@ -115,11 +101,12 @@ We recommend `whisper` with `"medium"` or higher model for best local accuracy.
 ## 🧪 Test Scenarios
 
 ### ✅ Scenario 1: Ollama + Zephyr (lightweight local)
+* Zephyr can be replaced with any llm
 
 #### Requirements
 
 - ~3.5 GB disk (Zephyr model)
-- 3 GB RAM
+- 7 GB RAM
 - ~1 GB VRAM (optional)
 
 #### Setup
