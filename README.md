@@ -14,7 +14,40 @@
   />
 </p>
 
+
+### 🧪 Current Status
+
+> **RAGdio is intended for local use, testing, and development purposes.**  
+> It's not production-ready and not designed for multi-user environments (yet).
+
+- ❗ Great for **experimenting** with audio-to-RAG pipelines locally.
+- ⚙️ Designed with **modularity** in mind — adapters, interfaces, and clean architecture.
+- 🚫 Not optimized for production load, scaling, or secure multi-user handling.
+- 📌 Requires manual setup of models (e.g., in Ollama) after first run.
+
+---
+
 Chat with memory/history feature (available in API and Local models)
+
+### ✅ Check transcription before add to RAG
+<p align="center">
+  <img 
+    src="./docs/media/add_element_to_rag_p1_v3.gif" 
+    alt="Check provided transcription" 
+    width="80%" 
+    style="border-radius: 8px;" 
+  />
+</p>
+
+### 🔍 Query
+<p align="center">
+  <img 
+    src="./docs/media/add_element_to_rag_p2.gif" 
+    alt="Query RAG" 
+    width="80%" 
+    style="border-radius: 8px;" 
+  />
+</p>
 
 ---
 
@@ -23,13 +56,33 @@ Chat with memory/history feature (available in API and Local models)
 ```bash
 git clone https://github.com/Kotmin/RAGdio
 cd RAGdio
+
+# 1. Configure environment variables
+copy from examples or manually set up
+
+# 2. Start services
 docker compose up --build
 ```
+
+
+Once everything is up and running, you can access:
+
+- 🖥️ **Frontend**: [http://localhost:5173](http://localhost:5173)  
+- 📡 **Backend (API docs)**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+### ⚠️ Note (Ollama Users)
+The default `docker-compose` setup includes an **Ollama server** _without any model pre-installed_.  
+After running `docker compose up`, you must install a model manually.
+
+You can install **Zephyr** or any other supported model.  
+👉 See [**Scenario 1: Ollama + Zephyr (lightweight local)**](#-scenario-1-ollama--zephyr-lightweight-local) for model installation instructions.
+
 
 Then open:
 
 - **Frontend**: http://localhost:5173
 - **Backend** (API docs): http://localhost:8000/docs
+- if using ollama: `install model` ()
 
 ---
 
