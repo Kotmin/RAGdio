@@ -17,7 +17,8 @@ app = FastAPI()
 # Allow frontend dev server to call API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # 👈 or ["*"] for dev only
+    # allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],  # 👈 or ["*"] for dev only
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

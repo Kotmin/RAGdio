@@ -93,6 +93,7 @@ ASR_MODEL=whisper                  # whisper, whisper-api
 OPENAI_API_KEY=sk-...              # for OpenAI-based features
 
 VECTOR_BACKEND=qdrant             # qdrant
+QDRANT_HOST=qdrant                # if starded within docker 
 EMBEDDING_BACKEND=huggingface     # huggingface, openai
 
 LLM_PROVIDER_TYPE=ollama          # openai, ollama, deepseek, local
