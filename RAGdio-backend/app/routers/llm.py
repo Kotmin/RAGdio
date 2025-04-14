@@ -82,10 +82,6 @@ async def stream_chat_response(payload: ChatRequest):
 
     append_turn(chat_id, "user", prompt)
     full_prompt = build_prompt(chat_id, prompt)
-
-    # use_memory = Config.LLM_PROVIDER_TYPE.lower() in ("openai",)  # OpenAI has own function to query
-
-    # query_input = full_prompt if use_memory else prompt
     
     rag_result = pipeline.query(full_prompt)
     answer = rag_result["answer"]
